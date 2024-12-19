@@ -1,11 +1,21 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import ScheduleView from './components/Calendar'
 import CreateTaskDialog from './components/CreateTaskDialog'
+import packageJson from '../package.json'
 
 function App() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<number | null>(null)
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours()
+    const fullName = packageJson.author?.name || 'User'
+    const firstName = fullName.split(' ')[0]
+    return hour < 12 
+      ? `Good Morning, ${firstName}. It is time to get it done.` 
+      : `Good Afternoon, ${firstName}. It is time to get it done.`
+  }, [])
 
   // Handler for adding tasks at specific time blocks
   const handleAddTask = (blockIndex: number) => {
@@ -18,7 +28,7 @@ function App() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-8">
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold">Task Calendar</h1>
+            <h1 className="text-3xl font-bold">{greeting}</h1>
           </div>
         </header>
 
