@@ -1,0 +1,253 @@
+{
+    "schedule": [
+      {
+        "time": "06:00",
+        "activity": "Wake up",
+        "actions": [
+          {
+            "type": "alarm",
+            "message": "Good morning! Time to start your day."
+          }
+        ]
+      },
+      {
+        "time": "06:00",
+        "activity": "Morning Routine",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Start your morning routine - hydration and stretching",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "06:30",
+        "activity": "Exercise",
+        "duration": 60,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Start your workout.",
+            "channels": ["text"]
+          },
+          {
+            "type": "api_call",
+            "service": "fitness_app",
+            "action": "start_workout_tracking"
+          }
+        ]
+      },
+      {
+        "time": "07:30",
+        "activity": "Breakfast",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time for a nutritious breakfast",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "08:00",
+        "activity": "Focus Work - Startup A",
+        "duration": 240,
+        "actions": [
+          {
+            "type": "distraction_block",
+            "mode": "enable",
+            "duration": 240
+          },
+          {
+            "type": "status_update",
+            "message": "Entering deep work session for Startup A.",
+            "channels": ["status_board"]
+          }
+        ]
+      },
+      {
+        "time": "12:00",
+        "activity": "Lunch Break",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time for lunch - take a proper break",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "12:30",
+        "activity": "Short Walk/Mindfulness",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time for walk and meditation",
+            "channels": ["text"]
+          },
+          {
+            "type": "api_call",
+            "service": "mindfulness_app",
+            "action": "start_session"
+          }
+        ]
+      },
+      {
+        "time": "13:00",
+        "activity": "Focus Work - Startup B",
+        "duration": 240,
+        "actions": [
+          {
+            "type": "distraction_block",
+            "mode": "enable",
+            "duration": 240
+          },
+          {
+            "type": "status_update",
+            "message": "Entering deep work session for Startup B.",
+            "channels": ["status_board"]
+          }
+        ]
+      },
+      {
+        "time": "17:00",
+        "activity": "Break",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Take a break - snack and hydration",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "17:30",
+        "activity": "Task Management & Meetings",
+        "duration": 120,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Starting task management and meetings block",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "19:30",
+        "activity": "Dinner",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time for dinner",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "20:00",
+        "activity": "Learning/Skill Improvement",
+        "duration": 90,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time for learning and skill improvement",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "21:30",
+        "activity": "Wind Down",
+        "duration": 30,
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Start winding down - journaling and light reading",
+            "channels": ["text"]
+          }
+        ]
+      },
+      {
+        "time": "22:00",
+        "activity": "Sleep",
+        "actions": [
+          {
+            "type": "reminder",
+            "message": "Time to sleep - good night!",
+            "channels": ["text"]
+          },
+          {
+            "type": "api_call",
+            "service": "smart_home",
+            "action": "night_mode"
+          }
+        ]
+      }
+    ],
+    "automations": [
+      {
+        "trigger": "before_task",
+        "task": "Focus Work - Startup A",
+        "actions": [
+          {
+            "type": "send_notification",
+            "message": "Upcoming: Deep work session for Startup A in 15 minutes.",
+            "channels": ["email", "text"]
+          }
+        ]
+      },
+      {
+        "trigger": "before_task",
+        "task": "Focus Work - Startup B",
+        "actions": [
+          {
+            "type": "send_notification",
+            "message": "Upcoming: Deep work session for Startup B in 15 minutes.",
+            "channels": ["email", "text"]
+          }
+        ]
+      },
+      {
+        "trigger": "missed_task",
+        "task": "Exercise",
+        "actions": [
+          {
+            "type": "send_alert",
+            "message": "You missed your exercise session today.",
+            "channels": ["email"],
+            "recipients": ["accountability_partner@example.com"]
+          }
+        ]
+      },
+      {
+        "trigger": "missed_task",
+        "task": "Focus Work - Startup A",
+        "actions": [
+          {
+            "type": "send_alert",
+            "message": "Missed deep work session for Startup A.",
+            "channels": ["email", "text"]
+          }
+        ]
+      },
+      {
+        "trigger": "missed_task",
+        "task": "Focus Work - Startup B",
+        "actions": [
+          {
+            "type": "send_alert",
+            "message": "Missed deep work session for Startup B.",
+            "channels": ["email", "text"]
+          }
+        ]
+      }
+    ]
+  }
+  
