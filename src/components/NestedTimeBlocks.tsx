@@ -18,6 +18,8 @@ export function NestedTimeBlocks({
       const blockIndex = timeBlocks.findIndex(b => b?.time === currentTime)
       if (blockIndex !== -1) {
         onAddTask(blockIndex, currentTime)
+      } else {
+        console.error('No matching time block found for:', currentTime)
       }
     } catch (error) {
       console.error('Error adding task:', error)
@@ -68,6 +70,11 @@ export function NestedTimeBlocks({
                 className="h-7 px-2 text-xs hover:bg-blue-100 hover:text-blue-700"
                 onClick={(e) => {
                   e.stopPropagation()
+                  const timeBlock = timeBlocks.find(b => b?.time === currentTime)
+                  if (!timeBlock) {
+                    console.error(`Time block not found for time: ${currentTime}`)
+                    return
+                  }
                   handleAddTask(currentTime)
                 }}
               >

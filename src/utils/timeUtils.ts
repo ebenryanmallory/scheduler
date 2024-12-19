@@ -1,16 +1,45 @@
-export const addMinutes = (time: string, minutes: number): string => {
-  const [hours, mins] = time.split(':').map(Number)
-  const totalMinutes = hours * 60 + mins + minutes
-  const newHours = Math.floor(totalMinutes / 60)
-  const newMins = totalMinutes % 60
-  return `${newHours.toString().padStart(2, '0')}:${newMins.toString().padStart(2, '0')}`
+export const addMinutes = (isoString: string, minutes: number): string => {
+  try {
+    const date = new Date(isoString)
+    if (isNaN(date.getTime())) {
+      // If we got an invalid date, assume it's a time string like "HH:mm"
+      const [hours, mins] = isoString.split(':').map(Number)
+      const today = new Date()
+      today.setHours(hours, mins, 0, 0)
+      today.setMinutes(today.getMinutes() + minutes)
+      return today.toISOString()
+    }
+    date.setMinutes(date.getMinutes() + minutes)
+    return date.toISOString()
+  } catch (error) {
+    console.error('Error in addMinutes:', error)
+    return isoString // Return original string if we can't process it
+  }
 }
 
-export const formatTimeToAMPM = (time: string): string => {
-  const [hours, minutes] = time.split(':').map(Number)
-  const period = hours >= 12 ? 'PM' : 'AM'
-  const displayHours = hours % 12 || 12
-  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+export const formatTimeToAMPM = (timeString: string): string => {
+  try {
+    let hours: number
+    let minutes: number
+
+    if (timeString.includes('T')) {
+      // Handle ISO string
+      const date = new Date(timeString)
+      if (isNaN(date.getTime())) throw new Error('Invalid date')
+      hours = date.getHours()
+      minutes = date.getMinutes()
+    } else {
+      // Handle "HH:mm" format
+      [hours, minutes] = timeString.split(':').map(Number)
+    }
+
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHours = hours % 12 || 12
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`
+  } catch (error) {
+    console.error('Error in formatTimeToAMPM:', error)
+    return timeString // Return original string if we can't process it
+  }
 }
 
 export const isWeekday = (date: Date) => {
@@ -20,11 +49,48 @@ export const isWeekday = (date: Date) => {
 
 export const generateTimeBlocks = (): { time: string }[] => {
   const blocks: { time: string }[] = []
-  for (let hour = 6; hour < 22; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-      blocks.push({ time })
-    }
+  const today = new Date()
+  today.setHours(6, 0, 0, 0) // Start at 6 AM
+
+  for (let i = 0; i < 32; i++) { // 16 hours * 2 blocks per hour
+    const time = today.toISOString()
+    blocks.push({ time })
+    today.setMinutes(today.getMinutes() + 30)
   }
   return blocks
+}
+
+export const createScheduledTime = (date: Date, timeString: string): string => {
+  try {
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const scheduledTime = new Date(date)
+    scheduledTime.setHours(hours, minutes, 0, 0)
+    return scheduledTime.toISOString()
+  } catch (error) {
+    console.error('Error in createScheduledTime:', error)
+    return new Date().toISOString() // Return current time if we can't process it
+  }
+}
+
+export const getTimeStringFromISO = (isoString: string): string => {
+  try {
+    const date = new Date(isoString)
+    if (isNaN(date.getTime())) {
+      // If it's already in HH:mm format, return as is
+      if (isoString.match(/^\d{2}:\d{2}$/)) return isoString
+      throw new Error('Invalid date')
+    }
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  } catch (error) {
+    console.error('Error in getTimeStringFromISO:', error)
+    return '00:00' // Return default time if we can't process it
+  }
+}
+
+export const isSameDay = (date1: Date, date2: Date): boolean => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  )
 } 

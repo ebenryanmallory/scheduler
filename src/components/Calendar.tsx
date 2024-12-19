@@ -145,19 +145,14 @@ function ScheduleView() {
 
   return (
     <div className="flex flex-row gap-4">
-      <Calendar 
-        mode="single"
-        selected={date}
-        onSelect={(newDate) => newDate && setDate(newDate)}
-        className="rounded-md border"
-      />
-      
-      <TaskList
-        tasks={tasks}
-        onTasksReorder={handleTasksReorder}
-        onUpdate={handleEditTask}
-        onDelete={handleTaskDelete}
-      />
+      <div className="rounded-md border">
+        <Calendar 
+          mode="single"
+          selected={date}
+          onSelect={(newDate) => newDate && setDate(newDate)}
+          className="p-2"
+        />
+      </div>
 
       <TimeBlocksPanel 
         selectedDate={date}
@@ -165,12 +160,19 @@ function ScheduleView() {
         tasks={tasks}
       />
 
+      <TaskList
+        tasks={tasks}
+        onTasksReorder={handleTasksReorder}
+        onUpdate={handleEditTask}
+        onDelete={handleTaskDelete}
+      />
+
       <CreateTaskDialog
         open={isCreateTaskOpen}
         onOpenChange={setIsCreateTaskOpen}
         selectedDate={date}
         selectedTimeBlock={selectedTimeBlock}
-        selectedTime={selectedTime}
+        selectedTime={selectedTime || ''}
         onTaskCreate={handleTaskCreate}
       />
 

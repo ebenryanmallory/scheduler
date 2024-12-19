@@ -40,15 +40,28 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
     })
   )
 
-  // Group tasks by project
+  // Separate persistent tasks that aren't completed
+  const persistentTasks = tasks.filter(task => task.persistent && !task.completed)
+  
+  // Group remaining tasks by project (excluding persistent tasks to avoid duplicates)
   const projectGroups: ProjectGroup[] = [
     {
+      name: "Persistent Tasks",
+      tasks: persistentTasks
+    },
+    {
       name: "Dynamic Momentum",
-      tasks: tasks.filter(task => task.project === "Dynamic Momentum")
+      tasks: tasks.filter(task => 
+        task.project === "Dynamic Momentum" && 
+        (!task.persistent || task.completed)
+      )
     },
     {
       name: "Motion Storyline",
-      tasks: tasks.filter(task => task.project === "Motion Storyline")
+      tasks: tasks.filter(task => 
+        task.project === "Motion Storyline" && 
+        (!task.persistent || task.completed)
+      )
     }
   ]
 
@@ -78,40 +91,44 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-4">
-        {projectGroups.map((group) => (
-          <div key={group.name} className="border rounded-lg p-2">
-            <Button
-              variant="ghost"
-              className="w-full flex justify-between items-center p-2"
-              onClick={() => toggleProject(group.name)}
-            >
-              <span className="font-semibold">{group.name}</span>
-              {expandedProject === group.name ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
-            
-            {expandedProject === group.name && (
-              <SortableContext
-                items={group.tasks}
-                strategy={verticalListSortingStrategy}
+        {projectGroups
+          .filter(group => group.tasks.length > 0)
+          .map((group) => (
+            <div key={group.name} className="border rounded-lg p-2">
+              <Button
+                variant="ghost"
+                className="w-full flex justify-between items-center p-2"
+                onClick={() => toggleProject(group.name)}
               >
-                <div className="space-y-2 mt-2">
-                  {group.tasks.map((task) => (
-                    <SortableTask
-                      key={task.id}
-                      {...task}
-                      onUpdate={onUpdate}
-                      onDelete={onDelete}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            )}
-          </div>
-        ))}
+                <span className="font-semibold">
+                  {group.name} ({group.tasks.length})
+                </span>
+                {expandedProject === group.name ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+              
+              {expandedProject === group.name && (
+                <SortableContext
+                  items={group.tasks}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2 mt-2">
+                    {group.tasks.map((task) => (
+                      <SortableTask
+                        key={task.id}
+                        {...task}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              )}
+            </div>
+          ))}
       </div>
     </DndContext>
   )

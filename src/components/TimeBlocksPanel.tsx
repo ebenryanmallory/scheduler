@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TimeBlock, ScheduleActivity } from '../types/schedule'
+import { ScheduleActivity } from '../types/schedule'
 import { scheduleActivities } from '../data/scheduleActivities'
 import { TimeBlockDetails } from './TimeBlockDetails'
 import { NestedTimeBlocks } from './NestedTimeBlocks'
@@ -7,26 +7,33 @@ import {
   formatTimeToAMPM, 
   addMinutes, 
   isWeekday, 
-  generateTimeBlocks 
+  generateTimeBlocks,
+  createScheduledTime,
+  getTimeStringFromISO
 } from '../utils/timeUtils'
+import { TaskType } from '@/types/task'
 
 interface TimeBlocksPanelProps {
   selectedDate: Date | null
-  onAddTask: (blockIndex: number) => void
+  onAddTask: (blockIndex: number, scheduledTime: string) => void
+  tasks: TaskType[]
 }
 
-function TimeBlocksPanel({ selectedDate, onAddTask }: TimeBlocksPanelProps) {
+function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProps) {
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null)
   const [expandedBlock, setExpandedBlock] = useState<string | null>(null)
 
   const timeBlocks = generateTimeBlocks()
 
   // Helper to check if a time falls within a duration block
-  const isWithinDurationBlock = (time: string): boolean => {
+  const isWithinDurationBlock = (scheduledTime: string): boolean => {
+    if (!selectedDate) return false
+    
     for (const [blockTime, activity] of Object.entries(scheduleActivities)) {
       if (activity.duration) {
-        const blockEnd = addMinutes(blockTime, activity.duration)
-        if (time > blockTime && time < blockEnd) {
+        const blockScheduledTime = createScheduledTime(selectedDate, blockTime)
+        const blockEndTime = addMinutes(blockScheduledTime, activity.duration)
+        if (scheduledTime > blockScheduledTime && scheduledTime < blockEndTime) {
           return true
         }
       }
@@ -35,15 +42,16 @@ function TimeBlocksPanel({ selectedDate, onAddTask }: TimeBlocksPanelProps) {
   }
 
   // Get activity for a specific time block
-  const getActivityForBlock = (time: string): ScheduleActivity | null => {
+  const getActivityForBlock = (scheduledTime: string): ScheduleActivity | null => {
     if (!selectedDate || !isWeekday(selectedDate)) return null
-    return scheduleActivities[time] || null
+    const timeString = getTimeStringFromISO(scheduledTime)
+    return scheduleActivities[timeString] || null
   }
 
   if (!selectedDate) return null
 
   return (
-    <div className="w-96 border-l border-gray-200 p-4 overflow-y-auto max-h-screen">
+    <div className="max-w-96 rounded-md border p-4">
       <h2 className="font-semibold mb-4">
         {selectedDate.toLocaleDateString('en-US', { 
           weekday: 'long',
@@ -57,24 +65,24 @@ function TimeBlocksPanel({ selectedDate, onAddTask }: TimeBlocksPanelProps) {
         <p className="text-gray-500 text-sm">No schedule available for weekends</p>
       ) : (
         <div className="space-y-2">
-          {timeBlocks.map((block, index) => {
-            const activity = getActivityForBlock(block.time)
-            const isSelected = selectedBlock === block.time
+          {timeBlocks.map(({ time: scheduledTime }) => {
+            const activity = getActivityForBlock(scheduledTime)
+            const isSelected = selectedBlock === scheduledTime
             
             // Skip blocks that are within a longer duration block
-            if (isWithinDurationBlock(block.time)) {
+            if (isWithinDurationBlock(scheduledTime)) {
               return null
             }
 
             const isExpandable = activity?.duration && activity.duration > 30
 
             return (
-              <div key={block.time}>
+              <div key={scheduledTime}>
                 <div 
                   onClick={() => {
-                    setSelectedBlock(isSelected ? null : block.time)
+                    setSelectedBlock(isSelected ? null : scheduledTime)
                     if (isExpandable) {
-                      setExpandedBlock(expandedBlock === block.time ? null : block.time)
+                      setExpandedBlock(expandedBlock === scheduledTime ? null : scheduledTime)
                     }
                   }}
                   className={`p-3 border rounded-lg cursor-pointer
@@ -85,14 +93,14 @@ function TimeBlocksPanel({ selectedDate, onAddTask }: TimeBlocksPanelProps) {
                 >
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-sm">
-                      {formatTimeToAMPM(block.time)}
-                      {activity?.duration > 30 && 
-                        ` - ${formatTimeToAMPM(addMinutes(block.time, activity.duration))}`
-                      }
+                      {formatTimeToAMPM(scheduledTime)}
+                      {activity?.duration > 30 && (
+                        ` - ${formatTimeToAMPM(addMinutes(scheduledTime, activity.duration))}`
+                      )}
                     </span>
                     {isExpandable && (
                       <span className="text-xs text-blue-600">
-                        {expandedBlock === block.time ? '▼' : '▶'}
+                        {expandedBlock === scheduledTime ? '▼' : '▶'}
                       </span>
                     )}
                   </div>
@@ -110,20 +118,20 @@ function TimeBlocksPanel({ selectedDate, onAddTask }: TimeBlocksPanelProps) {
                   )}
                 </div>
 
-                {/* Show nested blocks for expanded long-duration activities */}
-                {expandedBlock === block.time && isExpandable && activity && (
+                {expandedBlock === scheduledTime && isExpandable && activity && (
                   <NestedTimeBlocks
-                    startTime={block.time}
-                    duration={activity.duration}
+                    startTime={scheduledTime}
+                    duration={activity.duration || 0}
                     onAddTask={onAddTask}
                     timeBlocks={timeBlocks}
+                    tasks={tasks}
+                    parentActivity={activity}
                   />
                 )}
 
-                {/* Show details panel for selected block */}
                 {isSelected && activity && (
                   <TimeBlockDetails
-                    time={block.time}
+                    time={scheduledTime}
                     activity={activity}
                   />
                 )}

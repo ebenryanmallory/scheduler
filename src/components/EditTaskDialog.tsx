@@ -3,14 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
-import { TaskType } from '@/types/task'
-
-interface EditTaskDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  task: TaskType
-  onTaskUpdate: (taskId: string, updates: Partial<TaskType>) => void
-}
+import { Checkbox } from "@/components/ui/checkbox"
+import { EditTaskDialogProps } from '@/types/editTaskDialog'
 
 export default function EditTaskDialog({
   open,
@@ -21,7 +15,8 @@ export default function EditTaskDialog({
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description)
   const [project, setProject] = useState(task.project || '')
-  const [time, setTime] = useState(task.time)
+  const [scheduledTime, setScheduledTime] = useState(task.scheduledTime)
+  const [persistent, setPersistent] = useState(task.persistent || false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,7 +24,8 @@ export default function EditTaskDialog({
       title,
       description,
       project: project || undefined,
-      time,
+      scheduledTime,
+      persistent,
     })
   }
 
@@ -50,8 +46,8 @@ export default function EditTaskDialog({
           <div>
             <Input
               type="datetime-local"
-              value={time.slice(0, 16)} // Format datetime for input
-              onChange={(e) => setTime(new Date(e.target.value).toISOString())}
+              value={scheduledTime.slice(0, 16)} // Format datetime for input
+              onChange={(e) => setScheduledTime(new Date(e.target.value).toISOString())}
             />
           </div>
           <div>
@@ -68,6 +64,19 @@ export default function EditTaskDialog({
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
             />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="persistent-edit"
+              checked={persistent}
+              onCheckedChange={(checked: boolean) => setPersistent(checked)}
+            />
+            <label 
+              htmlFor="persistent-edit" 
+              className="text-sm text-gray-700 cursor-pointer"
+            >
+              Make task persistent (shows on all days until completed)
+            </label>
           </div>
           <div className="flex justify-end gap-2">
             <Button

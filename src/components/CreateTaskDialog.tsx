@@ -5,8 +5,9 @@ import { useState } from "react"
 import { TaskType } from "@/types/task"
 import { CreateTaskDialogProps, ProjectName } from "@/types/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { formatTimeToAMPM, addMinutes } from "@/utils/timeUtils"
+import { formatTimeToAMPM, addMinutes, createScheduledTime } from "@/utils/timeUtils"
 import { PROJECTS } from '@/config/projects'
+import { Checkbox } from "@/components/ui/checkbox"
 
 function CreateTaskDialog({ 
   open, 
@@ -18,6 +19,7 @@ function CreateTaskDialog({
 }: CreateTaskDialogProps) {
   const [title, setTitle] = useState("")
   const [project, setProject] = useState<ProjectName | "">("")
+  const [persistent, setPersistent] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,16 +33,17 @@ function CreateTaskDialog({
     const newTask: TaskType = {
       id: crypto.randomUUID(),
       title,
-      time: taskDateTime.toISOString(),
+      scheduledTime: createScheduledTime(selectedDate, selectedTime),
       completed: false,
-      date: selectedDate.toISOString(),
       description: '',
-      project: project || undefined
+      project: project || undefined,
+      persistent
     }
     
     onTaskCreate(newTask)
     setTitle("")
     setProject("")
+    setPersistent(false)
     onOpenChange(false)
   }
 
@@ -87,6 +90,20 @@ function CreateTaskDialog({
               ))}
             </SelectContent>
           </Select>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="persistent"
+              checked={persistent}
+              onCheckedChange={(checked) => setPersistent(checked as boolean)}
+            />
+            <label 
+              htmlFor="persistent" 
+              className="text-sm text-gray-700 cursor-pointer"
+            >
+              Make task persistent (shows on all days until completed)
+            </label>
+          </div>
           
           <Button type="submit">
             Create Task

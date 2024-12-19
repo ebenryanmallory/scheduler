@@ -5,12 +5,12 @@ import fs from 'fs/promises'
 interface Task {
   id: string
   title: string
-  time: string
+  scheduledTime: string
   completed: boolean
-  date: string
   description: string
   project?: string
   order?: number
+  persistent?: boolean
 }
 
 export class TaskService {
@@ -31,7 +31,7 @@ export class TaskService {
     await this.fileService.createFile(fileName, content)
   }
 
-  async getTasksByDate(date: Date): Promise<Task[]> {
+  async getTasksByDate(targetDate: Date): Promise<Task[]> {
     try {
       const files = await this.listFiles()
       const tasks: Task[] = []
@@ -40,11 +40,9 @@ export class TaskService {
         const content = await this.fileService.readFile(file)
         const task = this.parseMarkdown(content)
         
-        if (task.date) {
-          const taskDate = new Date(task.date)
-          if (this.isSameDay(taskDate, date)) {
-            tasks.push(task)
-          }
+        const taskDate = new Date(task.scheduledTime)
+        if (this.isSameDay(taskDate, targetDate) || (task.persistent && !task.completed)) {
+          tasks.push(task)
         }
       }
 
@@ -78,11 +76,11 @@ export class TaskService {
     return `---
 id: ${task.id}
 title: ${task.title}
-time: ${task.time}
+scheduledTime: ${task.scheduledTime}
 completed: ${task.completed}
-date: ${task.date}
 project: ${task.project || ''}
 order: ${task.order !== undefined ? task.order : 0}
+persistent: ${task.persistent || false}
 ---
 
 ${task.description}
@@ -110,12 +108,12 @@ ${task.description}
     return {
       id: metadata.id,
       title: metadata.title,
-      time: metadata.time || '',
+      scheduledTime: metadata.scheduledTime || '',
       completed: metadata.completed === 'true',
-      date: metadata.date || '',
       description: description.trim(),
       project: metadata.project || undefined,
-      order: metadata.order ? parseInt(metadata.order, 10) : undefined
+      order: metadata.order ? parseInt(metadata.order, 10) : undefined,
+      persistent: metadata.persistent === 'true'
     }
   }
 
