@@ -17,6 +17,7 @@ export interface NestedTimeBlocksProps {
   startTime: string
   duration: number
   onAddTask: (blockIndex: number, time: string) => void
+  onUpdateTask?: (id: string, updates: Partial<TaskType>) => Promise<void>
   timeBlocks: TimeBlock[]
   parentActivity?: ParentActivity
   tasks: TaskType[]

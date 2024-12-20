@@ -5,4 +5,5 @@ export interface EditTaskDialogProps {
   onOpenChange: (open: boolean) => void
   task: TaskType
   onTaskUpdate: (taskId: string, updates: Partial<TaskType>) => void
+  onSubmit: (updatedTask: TaskType) => void
 } 

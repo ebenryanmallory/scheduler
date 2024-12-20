@@ -4,11 +4,13 @@ import { TaskType } from "@/types/task"
 import { Badge } from '@/components/ui/badge'
 import { getProjectColor } from '@/config/projects'
 import { NestedTimeBlocksProps } from '@/types/timeBlock'
+import { Checkbox } from '@/components/ui/checkbox'
 
 export function NestedTimeBlocks({ 
   startTime, 
   duration, 
-  onAddTask, 
+  onAddTask,
+  onUpdateTask,
   timeBlocks,
   parentActivity,
   tasks = []
@@ -25,6 +27,44 @@ export function NestedTimeBlocks({
       console.error('Error adding task:', error)
     }
   }
+
+  const handleCompletedChange = async (task: TaskType, completed: boolean) => {
+    try {
+      if (onUpdateTask) {
+        await onUpdateTask(task.id, { ...task, completed });
+      }
+
+      if (completed && task.project) {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: 'ebenryanmallory@proton.me',
+            subject: `Project Milestone Completed: ${task.project}`,
+            content: `
+              <h1>Project Milestone Completed! 🎉</h1>
+              <p>A significant task has been completed in the ${task.project} project:</p>
+              <ul>
+                <li><strong>Task:</strong> ${task.title}</li>
+                <li><strong>Project:</strong> ${task.project}</li>
+                <li><strong>Time:</strong> ${formatTimeToAMPM(task.scheduledTime)}</li>
+                ${task.description ? `<li><strong>Description:</strong> ${task.description}</li>` : ''}
+              </ul>
+              <p>Keep up the great work!</p>
+            `
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to send email notification');
+        }
+      }
+    } catch (error) {
+      console.error('Error handling task completion:', error);
+    }
+  };
 
   const renderTimeBlock = (currentTime: string, description: string, task?: TaskType) => {
     const projectColors = task?.project ? getProjectColor(task.project) : null
@@ -48,7 +88,16 @@ export function NestedTimeBlocks({
             )}
             {task?.title && (
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-medium text-blue-600">
+                <Checkbox
+                  checked={task.completed}
+                  onCheckedChange={(checked) => 
+                    handleCompletedChange(task, checked as boolean)
+                  }
+                  className="mr-2"
+                />
+                <span className={`text-sm font-medium text-blue-600 ${
+                  task.completed ? 'line-through text-gray-400' : ''
+                }`}>
                   {task.title}
                 </span>
                 {task.project && projectColors && (
@@ -94,7 +143,7 @@ export function NestedTimeBlocks({
 
   while (currentTime < endTime) {
     const description = parentActivity?.slots?.[slotIndex]?.description || ''
-    const task = tasks?.find(t => t?.time === currentTime)
+    const task = tasks?.find(t => t?.scheduledTime === currentTime)
     blocks.push(renderTimeBlock(currentTime, description, task))
     currentTime = addMinutes(currentTime, 30)
     slotIndex++

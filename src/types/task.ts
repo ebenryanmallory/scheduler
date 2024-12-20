@@ -1,7 +1,7 @@
 export interface TaskType {
   id: string
   title: string
-  scheduledTime: string  // ISO string for the task's scheduled time
+  scheduledTime: string
   completed: boolean
   description: string
   project?: string

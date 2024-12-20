@@ -5,7 +5,8 @@ import { TaskType } from "@/types/task"
 import { GripVertical } from "lucide-react"
 
 interface SortableTaskProps extends TaskType {
-  onUpdate?: (task: TaskType) => void
+  onTaskUpdate?: (taskId: string, updates: Partial<TaskType>) => void
+  onEdit?: (task: TaskType) => void
   onDelete?: (id: string) => void
 }
 
@@ -16,31 +17,24 @@ export function SortableTask(props: SortableTaskProps) {
     setNodeRef,
     transform,
     transition,
-    isDragging,
   } = useSortable({ id: props.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   }
 
-  return (
-    <div 
-      ref={setNodeRef} 
-      style={style}
-      className="flex items-center gap-2"
-    >
-      <div 
-        {...attributes} 
-        {...listeners}
-        className="cursor-move p-2"
-      >
-        <GripVertical className="h-4 w-4 text-gray-400" />
-      </div>
+  const handleTaskUpdate = props.onTaskUpdate 
+    ? (task: TaskType) => props.onTaskUpdate!(task.id, task)
+    : undefined
 
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-2">
+      <div {...attributes} {...listeners} className="cursor-grab">
+        <GripVertical className="h-5 w-5 text-gray-400" />
+      </div>
       <div className="flex-1">
-        <Task {...props} />
+        <Task {...props} onTaskUpdate={handleTaskUpdate} />
       </div>
     </div>
   )

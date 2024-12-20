@@ -5,24 +5,32 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { TaskType } from '../types/task'
 import { Checkbox } from './ui/checkbox'
 import { cn } from '@/lib/utils'
+import { taskService } from '@/services/taskService'
+import { useState, useEffect } from 'react'
 
-interface TaskProps extends TaskType {
-  onUpdate?: (task: TaskType) => void
-  onDelete?: (id: string) => void
+type TaskProps = TaskType & {
+  onEdit?: (task: TaskType) => void
 }
 
 export function Task({ 
   id, 
   title, 
-  scheduledTime, 
+  scheduledTime,
   project, 
   completed, 
   description, 
   order,
   persistent,
-  onUpdate, 
-  onDelete 
+  onEdit
 }: TaskProps) {
+  const [isChecked, setIsChecked] = useState(completed);
+
+  useEffect(() => {
+    if (isChecked !== completed) {
+      handleCompletedChange(isChecked);
+    }
+  }, [isChecked]);
+
   const getProjectColor = (project: string) => {
     switch (project) {
       case 'Dynamic Momentum':
@@ -46,58 +54,76 @@ export function Task({
     e.stopPropagation()
     e.preventDefault()
     
-    onUpdate?.({ 
-      id, 
-      title, 
-      scheduledTime, 
-      project, 
-      completed, 
-      description,
-      order: order || 0,
-      persistent
-    })
-  }
+    if (!onEdit) return;
 
-  const handleCompletedChange = (checked: boolean) => {
-    onUpdate?.({
+    onEdit({
       id,
       title,
       scheduledTime,
       project,
-      completed: checked,
+      completed,
       description,
       order: order || 0,
       persistent
-    })
+    });
+  }
+
+  const handleCompletedChange = async (checked: boolean) => {
+    try {
+      await taskService.updateTask({
+        id,
+        title,
+        scheduledTime,
+        project,
+        completed: checked,
+        description,
+        order: order || 0,
+        persistent
+      });
+
+    } catch (error) {
+      console.error('Failed to update task completion:', error)
+    }
+  }
+
+  const handleDeleteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    
+    try {
+      await taskService.deleteTask(id)
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+      // TODO: Add error handling UI
+    }
   }
 
   return (
     <div className={cn(
       "bg-white rounded-lg border border-gray-200 shadow-sm p-3",
-      completed && "bg-gray-50"
+      isChecked && "bg-gray-50"
     )}>
       <div className="flex items-center justify-between">
         <div className="flex items-start gap-3">
           {persistent && (
-            <div className="pt-1">
+            <div className="pt-1" >
               <Checkbox 
-                checked={completed}
-                onCheckedChange={handleCompletedChange}
-                id={`task-${id}-completed`}
+                checked={isChecked}
+                onCheckedChange={setIsChecked}
               />
             </div>
           )}
           <div className="flex flex-col gap-1">
             <span className={cn(
               "font-medium",
-              completed && "text-gray-400 line-through"
+              isChecked && "text-gray-400 line-through"
             )}>
               {title}
             </span>
             <div className="flex items-center gap-2">
               <span className={cn(
                 "text-xs text-gray-600",
-                completed && "text-gray-400"
+                isChecked && "text-gray-400"
               )}>
                 {formatDate(scheduledTime)}
                 <span className="mx-1">•</span>
@@ -111,7 +137,7 @@ export function Task({
                   variant="secondary" 
                   className={cn(
                     `text-xs px-2 py-0.5 ${getProjectColor(project)}`,
-                    completed && "opacity-50"
+                    isChecked && "opacity-50"
                   )}
                 >
                   {project}
@@ -122,50 +148,42 @@ export function Task({
                   variant="secondary" 
                   className={cn(
                     "text-xs px-2 py-0.5 bg-blue-100 text-blue-800",
-                    completed && "opacity-50"
+                    isChecked && "opacity-50"
                   )}
                 >
-                  Persistent
+                  Goal
                 </Badge>
               )}
             </div>
           </div>
         </div>
         
-        {(onUpdate || onDelete) && (
-          <div className="flex items-center gap-2">
-            {onUpdate && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={handleEditClick}
-              >
-                <Pencil className={cn(
-                  "h-4 w-4 text-gray-500 hover:text-blue-600",
-                  completed && "opacity-50"
-                )} />
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  onDelete(id)
-                }}
-              >
-                <Trash2 className={cn(
-                  "h-4 w-4 text-gray-500 hover:text-red-600",
-                  completed && "opacity-50"
-                )} />
-              </Button>
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={handleEditClick}
+            >
+              <Pencil className={cn(
+                "h-4 w-4 text-gray-500 hover:text-blue-600",
+                isChecked && "opacity-50"
+              )} />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={handleDeleteClick}
+          >
+            <Trash2 className={cn(
+              "h-4 w-4 text-gray-500 hover:text-red-600",
+              isChecked && "opacity-50"
+            )} />
+          </Button>
+        </div>
       </div>
     </div>
   )

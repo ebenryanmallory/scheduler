@@ -92,14 +92,14 @@ export const scheduleActivities: ScheduleActivities = {
     duration: 240,
     tag: "focus_motion",
     slots: [
-      { description: "Review storyboard requirements" },
-      { description: "Create initial animations" },
-      { description: "Refine motion sequences" },
-      { description: "Add transition effects" },
-      { description: "Implement feedback changes" },
-      { description: "Quality assurance" },
-      { description: "Performance optimization" },
-      { description: "Final review" }
+      { description: "Identify bottlenecks" },
+      { description: "List All Current Tasks" },
+      { description: "Time Blocking: Effort vs. Impact High-To-Low-Priority Tasks" },
+      { description: "Continuous Improvement:" },
+      { description: "Documentation" },
+      { description: "" },
+      { description: "" },
+      { description: "" }
     ],
     actions: [
       {

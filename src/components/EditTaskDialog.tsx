@@ -6,11 +6,12 @@ import { Textarea } from './ui/textarea'
 import { Checkbox } from "@/components/ui/checkbox"
 import { EditTaskDialogProps } from '@/types/editTaskDialog'
 
-export default function EditTaskDialog({
+export function EditTaskDialog({
   open,
   onOpenChange,
   task,
   onTaskUpdate,
+  onSubmit,
 }: EditTaskDialogProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description)
@@ -20,7 +21,8 @@ export default function EditTaskDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onTaskUpdate(task.id, {
+    onSubmit({
+      id: task.id,
       title,
       description,
       project: project || undefined,

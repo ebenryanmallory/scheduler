@@ -17,21 +17,12 @@ import { SortableTask } from "./SortableTasks"
 import { useState } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "./ui/button"
+import { EditTaskDialog } from './EditTaskDialog'
+import { TaskListProps, ProjectGroup } from "@/types/taskList"
 
-interface TaskListProps {
-  tasks: TaskType[]
-  onTasksReorder: (tasks: TaskType[]) => void
-  onUpdate?: (task: TaskType) => void
-  onDelete?: (id: string) => void
-}
-
-interface ProjectGroup {
-  name: string
-  tasks: TaskType[]
-}
-
-export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskListProps) {
+export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete }: TaskListProps) {
   const [expandedProject, setExpandedProject] = useState<string>("Dynamic Momentum")
+  const [editingTask, setEditingTask] = useState<TaskType | null>(null)
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -40,25 +31,28 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
     })
   )
 
-  // Separate persistent tasks that aren't completed
-  const persistentTasks = tasks.filter(task => task.persistent && !task.completed)
-  
-  // Group remaining tasks by project (excluding persistent tasks to avoid duplicates)
+  // Group tasks by project, separating persistent and regular tasks
   const projectGroups: ProjectGroup[] = [
     {
-      name: "Persistent Tasks",
-      tasks: persistentTasks
-    },
-    {
       name: "Dynamic Momentum",
-      tasks: tasks.filter(task => 
+      persistentTasks: tasks.filter(task => 
+        task.project === "Dynamic Momentum" && 
+        task.persistent &&
+        !task.completed
+      ),
+      regularTasks: tasks.filter(task => 
         task.project === "Dynamic Momentum" && 
         (!task.persistent || task.completed)
       )
     },
     {
       name: "Motion Storyline",
-      tasks: tasks.filter(task => 
+      persistentTasks: tasks.filter(task => 
+        task.project === "Motion Storyline" && 
+        task.persistent &&
+        !task.completed
+      ),
+      regularTasks: tasks.filter(task => 
         task.project === "Motion Storyline" && 
         (!task.persistent || task.completed)
       )
@@ -84,6 +78,14 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
     setExpandedProject(expandedProject === projectName ? "" : projectName)
   }
 
+  const handleEdit = (task: TaskType) => {
+    setEditingTask(task)
+  }
+
+  const handleCloseEdit = () => {
+    setEditingTask(null)
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -92,7 +94,7 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
     >
       <div className="space-y-4">
         {projectGroups
-          .filter(group => group.tasks.length > 0)
+          .filter(group => group.persistentTasks.length > 0 || group.regularTasks.length > 0)
           .map((group) => (
             <div key={group.name} className="border rounded-lg p-2">
               <Button
@@ -101,7 +103,7 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
                 onClick={() => toggleProject(group.name)}
               >
                 <span className="font-semibold">
-                  {group.name} ({group.tasks.length})
+                  {group.name} ({group.persistentTasks.length + group.regularTasks.length})
                 </span>
                 {expandedProject === group.name ? (
                   <ChevronDown className="h-4 w-4" />
@@ -112,24 +114,67 @@ export function TaskList({ tasks, onTasksReorder, onUpdate, onDelete }: TaskList
               
               {expandedProject === group.name && (
                 <SortableContext
-                  items={group.tasks}
+                  items={[...group.persistentTasks, ...group.regularTasks]}
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-2 mt-2">
-                    {group.tasks.map((task) => (
-                      <SortableTask
-                        key={task.id}
-                        {...task}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                      />
-                    ))}
+                    {/* Render persistent tasks first */}
+                    {group.persistentTasks.length > 0 && (
+                      <div className="mb-4">
+                        <div className="text-sm text-muted-foreground mb-2">Longer timeline goals</div>
+                        {group.persistentTasks.map((task) => (
+                          <SortableTask
+                            key={task.id}
+                            {...task}
+                            onTaskUpdate={onTaskUpdate}
+                            onEdit={handleEdit}
+                            onDelete={onDelete}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {/* Render regular tasks */}
+                    {group.regularTasks.length > 0 && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-2">Daily</div>
+                        {group.regularTasks.map((task) => (
+                          <SortableTask
+                            key={task.id}
+                            {...task}
+                            onTaskUpdate={onTaskUpdate}
+                            onEdit={handleEdit}
+                            onDelete={onDelete}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </SortableContext>
               )}
             </div>
           ))}
       </div>
+
+      {editingTask && (
+        <EditTaskDialog 
+          task={editingTask} 
+          open={!!editingTask}
+          onTaskUpdate={(updatedTask: TaskType) => {
+            if (onTaskUpdate) {
+              onTaskUpdate(updatedTask)
+            }
+          }}
+          onSubmit={(updatedTask: TaskType) => {
+            if (onTaskUpdate) {
+              onTaskUpdate(updatedTask)
+            }
+            handleCloseEdit();
+          }}
+          onOpenChange={(open) => {
+            if (!open) handleCloseEdit();
+          }}
+        />
+      )}
     </DndContext>
   )
 }

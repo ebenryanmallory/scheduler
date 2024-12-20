@@ -1,3 +1,15 @@
+import { TaskType } from './task'
+
+export interface Schedule {
+  date: Date
+  tasks: TaskType[]
+  // Add any new schedule-related properties here if necessary
+}
+
+export interface ScheduleViewProps {
+  selectedDate?: Date | null;
+  onDateSelect: (date: Date) => void;
+} 
 export interface TimeBlock {
   time: string  // ISO string
   activity?: string

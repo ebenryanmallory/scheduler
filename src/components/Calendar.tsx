@@ -1,38 +1,51 @@
 import { useState, useEffect } from "react"
 import { Calendar } from "@/components/ui/calendar"
-import { Task as TaskType } from "@/types/task"
-import { Task } from "@/components/Task"
+import { TaskType } from "@/types/task"
+import { taskService } from "@/services/taskService"
+
 import TimeBlocksPanel from './TimeBlocksPanel'
-import CreateTaskDialog from './CreateTaskDialog'
 import { TaskList } from "./TaskList"
-import EditTaskDialog from './EditTaskDialog'
+import CreateTaskDialog from './CreateTaskDialog'
+import { EditTaskDialog } from './EditTaskDialog'
+
+interface TaskState {
+  tasks: TaskType[]
+  taskToEdit: TaskType | null
+}
+
+interface DialogState {
+  isCreateOpen: boolean
+  isEditOpen: boolean
+  selectedTimeBlock: number
+  selectedTime: string | undefined
+}
 
 function ScheduleView() {
   const [date, setDate] = useState<Date>(new Date())
-  const [tasks, setTasks] = useState<TaskType[]>([])
-  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false)
-  const [selectedTimeBlock, setSelectedTimeBlock] = useState(0)
-  const [selectedTime, setSelectedTime] = useState<string>()
-  const [isEditTaskOpen, setIsEditTaskOpen] = useState(false)
-  const [taskToEdit, setTaskToEdit] = useState<TaskType | null>(null)
-  const apiUrl = 'http://localhost:3001/api'
+  
+  // Task-related state
+  const [{ tasks, taskToEdit }, setTaskState] = useState<TaskState>({
+    tasks: [],
+    taskToEdit: null
+  })
+
+  // Dialog-related state
+  const [{ isCreateOpen, isEditOpen, selectedTimeBlock, selectedTime }, setDialogState] = 
+    useState<DialogState>({
+      isCreateOpen: false,
+      isEditOpen: false,
+      selectedTimeBlock: 0,
+      selectedTime: undefined
+    })
 
   useEffect(() => {
-    if (date) {
-      loadTasks(date)
-    }
+    loadTasks(date)
   }, [date])
 
   const loadTasks = async (date: Date) => {
     try {
-      const response = await fetch(
-        `${apiUrl}/tasks?date=${date.toISOString()}`
-      )
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks')
-      }
-      const tasks = await response.json()
-      setTasks(tasks)
+      const tasks = await taskService.fetchTasks(date)
+      setTaskState(prev => ({ ...prev, tasks }))
     } catch (error) {
       console.error('Failed to load tasks:', error)
       // TODO: Add error handling UI
@@ -40,29 +53,23 @@ function ScheduleView() {
   }
 
   const handleAddTask = (blockIndex: number, time: string) => {
-    setSelectedTimeBlock(blockIndex)
-    setSelectedTime(time)
-    setIsCreateTaskOpen(true)
+    setDialogState(prev => ({
+      ...prev,
+      selectedTimeBlock: blockIndex,
+      selectedTime: time,
+      isCreateOpen: true
+    }))
   }
 
+  const handleEditTask = (task: TaskType) => {
+    setTaskState(prev => ({ ...prev, taskToEdit: task }))
+    setDialogState(prev => ({ ...prev, isEditOpen: true }))
+  }
+
+  // CRUD Operations
   const handleTaskCreate = async (task: TaskType) => {
     try {
-      const response = await fetch(`${apiUrl}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...task,
-          date: date.toISOString(),
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to create task')
-      }
-
-      // Reload tasks to ensure we have the latest data
+      await taskService.createTask(task, date)
       await loadTasks(date)
     } catch (error) {
       console.error('Failed to create task:', error)
@@ -70,24 +77,10 @@ function ScheduleView() {
     }
   }
 
-  const handleTaskUpdate = async (taskId: string, updates: Partial<TaskType>) => {
+  const handleTaskUpdate = async (updatedTask: TaskType) => {
     try {
-      const response = await fetch(`${apiUrl}/tasks/${taskId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update task')
-      }
-
-      // Reload tasks to ensure we have the latest data
+      await taskService.updateTask(updatedTask)
       await loadTasks(date)
-      setIsEditTaskOpen(false)
-      setTaskToEdit(null)
     } catch (error) {
       console.error('Failed to update task:', error)
       // TODO: Add error handling UI
@@ -96,15 +89,7 @@ function ScheduleView() {
 
   const handleTaskDelete = async (taskId: string) => {
     try {
-      const response = await fetch(`${apiUrl}/tasks/${taskId}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete task')
-      }
-
-      // Reload tasks to ensure we have the latest data
+      await taskService.deleteTask(taskId)
       await loadTasks(date)
     } catch (error) {
       console.error('Failed to delete task:', error)
@@ -113,34 +98,13 @@ function ScheduleView() {
   }
 
   const handleTasksReorder = async (reorderedTasks: TaskType[]) => {
-    // Add order field to each task based on new position
-    const tasksWithOrder = reorderedTasks.map((task, index) => ({
-      ...task,
-      order: index
-    }))
-    
-    setTasks(tasksWithOrder)
-    
+    setTaskState(prev => ({ ...prev, tasks: reorderedTasks }))
     try {
-      // Update each task with its new order
-      await Promise.all(tasksWithOrder.map(task => 
-        fetch(`${apiUrl}/tasks/${task.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ order: task.order }),
-        })
-      ))
+      await taskService.reorderTasks(reorderedTasks)
     } catch (error) {
       console.error('Failed to save task order:', error)
-      // You might want to show an error toast here
+      // TODO: Add error handling UI
     }
-  }
-
-  const handleEditTask = (task: TaskType) => {
-    setTaskToEdit(task)
-    setIsEditTaskOpen(true)
   }
 
   return (
@@ -163,13 +127,14 @@ function ScheduleView() {
       <TaskList
         tasks={tasks}
         onTasksReorder={handleTasksReorder}
-        onUpdate={handleEditTask}
+        onUpdate={handleTaskUpdate}
+        onEdit={handleEditTask}
         onDelete={handleTaskDelete}
       />
 
       <CreateTaskDialog
-        open={isCreateTaskOpen}
-        onOpenChange={setIsCreateTaskOpen}
+        open={isCreateOpen}
+        onOpenChange={(open) => setDialogState(prev => ({ ...prev, isCreateOpen: open }))}
         selectedDate={date}
         selectedTimeBlock={selectedTimeBlock}
         selectedTime={selectedTime || ''}
@@ -178,10 +143,11 @@ function ScheduleView() {
 
       {taskToEdit && (
         <EditTaskDialog
-          open={isEditTaskOpen}
-          onOpenChange={setIsEditTaskOpen}
+          open={isEditOpen}
+          onOpenChange={(open) => setDialogState(prev => ({ ...prev, isEditOpen: open }))}
           task={taskToEdit}
           onTaskUpdate={handleTaskUpdate}
+          onSubmit={handleTaskUpdate}
         />
       )}
     </div>
