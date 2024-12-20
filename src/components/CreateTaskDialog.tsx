@@ -5,7 +5,7 @@ import { useState } from "react"
 import { TaskType } from "@/types/task"
 import { CreateTaskDialogProps, ProjectName } from "@/types/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { formatTimeToAMPM, addMinutes, createScheduledTime } from "@/utils/timeUtils"
+import { formatTimeToAMPM, addMinutes, createScheduledTime, getTimeStringFromISO } from "@/utils/timeUtils"
 import { PROJECTS } from '@/config/projects'
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -26,14 +26,25 @@ function CreateTaskDialog({
     
     if (!selectedDate || !selectedTime) return
 
-    const [hours, minutes] = selectedTime.split(':').map(Number)
+    const formattedTime = selectedTime.includes('T') 
+      ? getTimeStringFromISO(selectedTime)
+      : selectedTime
+
+    console.log('Debug values:', {
+      selectedDate,
+      selectedTime,
+      formattedTime,
+      result: createScheduledTime(selectedDate, formattedTime)
+    });
+
+    const [hours, minutes] = formattedTime.split(':').map(Number)
     const taskDateTime = new Date(selectedDate)
     taskDateTime.setHours(hours, minutes)
     
     const newTask: TaskType = {
       id: crypto.randomUUID(),
       title,
-      scheduledTime: createScheduledTime(selectedDate, selectedTime),
+      scheduledTime: createScheduledTime(selectedDate, formattedTime),
       completed: false,
       description: '',
       project: project || undefined,

@@ -53,8 +53,6 @@ export function Task({
   }
 
   const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
     
     if (!onEdit) return;
 
@@ -110,8 +108,6 @@ export function Task({
   }
 
   const handleDeleteClick = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
     
     try {
       await taskService.deleteTask(id)

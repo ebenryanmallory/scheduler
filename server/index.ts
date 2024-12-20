@@ -33,9 +33,17 @@ app.post('/api/tasks', async (req: Request, res: Response) => {
   try {
     const task = req.body;
     await taskService.createTask(task);
-    res.status(201).send('Task created');
+    res.status(201).json({ 
+      success: true, 
+      message: 'Task created',
+      task: task 
+    });
   } catch (error) {
-    res.status(500).send(error instanceof Error ? error.message : 'Unknown error');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to create task',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
@@ -64,9 +72,17 @@ app.delete('/api/tasks/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await taskService.deleteTask(id);
-    res.status(200).send('Task deleted');
+    res.status(200).json({ 
+      success: true, 
+      message: 'Task deleted',
+      taskId: id 
+    });
   } catch (error) {
-    res.status(500).send(error instanceof Error ? error.message : 'Unknown error');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to delete task',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 

@@ -92,6 +92,7 @@ function ScheduleView() {
   }
 
   const handleTaskDelete = async (taskId: string) => {
+    console.log('Deleting task:', taskId)
     try {
       await taskService.deleteTask(taskId)
       await loadTasks(date)

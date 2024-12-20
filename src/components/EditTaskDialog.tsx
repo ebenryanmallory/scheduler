@@ -41,7 +41,6 @@ export function EditTaskDialog({
       persistent,
       completed: task.completed
     }
-    console.log(updatedTask)
     onTaskUpdate(updatedTask)
     onOpenChange(false)
   }

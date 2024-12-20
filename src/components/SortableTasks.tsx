@@ -7,7 +7,6 @@ import { GripVertical } from "lucide-react"
 interface SortableTaskProps extends TaskType {
   onTaskUpdate?: (task: TaskType) => void
   onEdit?: (task: TaskType) => void
-  onDelete?: (id: string) => void
 }
 
 export function SortableTask(props: SortableTaskProps) {
@@ -30,7 +29,10 @@ export function SortableTask(props: SortableTaskProps) {
         <GripVertical className="h-5 w-5 text-gray-400" />
       </div>
       <div className="flex-1">
-        <Task {...props} onEdit={props.onEdit} onUpdate={props.onTaskUpdate} />
+        <Task {...props} 
+          onEdit={props.onEdit} 
+          onUpdate={props.onTaskUpdate}
+        />
       </div>
     </div>
   )

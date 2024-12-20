@@ -62,13 +62,26 @@ export const generateTimeBlocks = (): { time: string }[] => {
 
 export const createScheduledTime = (date: Date, timeString: string): string => {
   try {
-    const [hours, minutes] = timeString.split(':').map(Number)
-    const scheduledTime = new Date(date)
-    scheduledTime.setHours(hours, minutes, 0, 0)
-    return scheduledTime.toISOString()
+    // Validate timeString format
+    if (!timeString.match(/^\d{2}:\d{2}$/)) {
+      throw new Error('Invalid time format. Expected HH:mm');
+    }
+
+    const [hours, minutes] = timeString.split(':').map(Number);
+    
+    // Validate hours and minutes
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      throw new Error('Invalid hours or minutes');
+    }
+
+    const scheduledTime = new Date(date);
+    scheduledTime.setHours(hours, minutes, 0, 0);
+    return scheduledTime.toISOString();
   } catch (error) {
-    console.error('Error in createScheduledTime:', error)
-    return new Date().toISOString() // Return current time if we can't process it
+    console.error('Error in createScheduledTime:', error);
+    // Return current time if we can't process it
+    const now = new Date();
+    return now.toISOString();
   }
 }
 
