@@ -73,43 +73,51 @@ export class TaskService {
   }
 
   private generateMarkdown(task: Task): string {
-    return `---
-id: ${task.id}
-title: ${task.title}
-scheduledTime: ${task.scheduledTime}
-completed: ${task.completed}
-project: ${task.project || ''}
-order: ${task.order !== undefined ? task.order : 0}
-persistent: ${task.persistent || false}
----
+    const frontMatter = [
+        `---`,
+        `id: ${task.id}`,
+        `title: ${task.title}`,
+        `scheduledTime: ${task.scheduledTime}`,
+        ...(task.persistent ? [`completed: ${task.completed}`] : []),
+        `project: ${task.project || ''}`,
+        `order: ${task.order !== undefined ? task.order : 0}`,
+        `persistent: ${task.persistent || false}`,
+        `---`
+    ].join('\n')
 
-${task.description}
-`
+    return `${frontMatter}\n\n${task.description}`
   }
 
   private parseMarkdown(content: string): Task {
-    const frontMatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
-    const match = content.match(frontMatterRegex)
+    const normalizedContent = content.replace(/\r\n/g, '\n').trim()
+    
+    const frontMatterRegex = /^---\s*([\s\S]*?)\s*---\s*([\s\S]*)?$/
+    const match = normalizedContent.match(frontMatterRegex)
     
     if (!match) {
+      // Add more detailed error information
+      console.error('Failed to parse markdown. Content:', normalizedContent)
       throw new Error('Invalid markdown format')
-    }
+  }
 
-    const [, frontMatter, description] = match
-    const metadata: Record<string, string> = {}
+  const [, frontMatter, description = ''] = match
+  const metadata: Record<string, string> = {}
     
-    frontMatter.split('\n').forEach(line => {
-      const [key, value] = line.split(': ')
-      if (key && value) {
-        metadata[key.trim()] = value.trim()
-      }
+    frontMatter.split('\n')
+    .filter(line => line.trim())
+    .forEach(line => {
+        const [key, ...valueParts] = line.split(':')
+        if (key && valueParts.length > 0) {
+            // Join value parts back together in case the value contained colons
+            metadata[key.trim()] = valueParts.join(':').trim()
+        }
     })
 
     return {
       id: metadata.id,
       title: metadata.title,
       scheduledTime: metadata.scheduledTime || '',
-      completed: metadata.completed === 'true',
+      completed: metadata.completed ? metadata.completed === 'true' : false,
       description: description.trim(),
       project: metadata.project || undefined,
       order: metadata.order ? parseInt(metadata.order, 10) : undefined,

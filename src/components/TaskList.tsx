@@ -17,12 +17,10 @@ import { SortableTask } from "./SortableTasks"
 import { useState } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "./ui/button"
-import { EditTaskDialog } from './EditTaskDialog'
 import { TaskListProps, ProjectGroup } from "@/types/taskList"
 
 export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete }: TaskListProps) {
   const [expandedProject, setExpandedProject] = useState<string>("Dynamic Momentum")
-  const [editingTask, setEditingTask] = useState<TaskType | null>(null)
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -78,14 +76,6 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
     setExpandedProject(expandedProject === projectName ? "" : projectName)
   }
 
-  const handleEdit = (task: TaskType) => {
-    setEditingTask(task)
-  }
-
-  const handleCloseEdit = () => {
-    setEditingTask(null)
-  }
-
   return (
     <DndContext
       sensors={sensors}
@@ -127,7 +117,7 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
                             key={task.id}
                             {...task}
                             onTaskUpdate={onTaskUpdate}
-                            onEdit={handleEdit}
+                            onEdit={onEdit}
                             onDelete={onDelete}
                           />
                         ))}
@@ -142,7 +132,7 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
                             key={task.id}
                             {...task}
                             onTaskUpdate={onTaskUpdate}
-                            onEdit={handleEdit}
+                            onEdit={onEdit}
                             onDelete={onDelete}
                           />
                         ))}
@@ -154,27 +144,6 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
             </div>
           ))}
       </div>
-
-      {editingTask && (
-        <EditTaskDialog 
-          task={editingTask} 
-          open={!!editingTask}
-          onTaskUpdate={(updatedTask: TaskType) => {
-            if (onTaskUpdate) {
-              onTaskUpdate(updatedTask)
-            }
-          }}
-          onSubmit={(updatedTask: TaskType) => {
-            if (onTaskUpdate) {
-              onTaskUpdate(updatedTask)
-            }
-            handleCloseEdit();
-          }}
-          onOpenChange={(open) => {
-            if (!open) handleCloseEdit();
-          }}
-        />
-      )}
     </DndContext>
   )
 }

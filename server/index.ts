@@ -41,12 +41,22 @@ app.post('/api/tasks', async (req: Request, res: Response) => {
 
 app.put('/api/tasks/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-    await taskService.updateTask(id, updates);
-    res.status(200).send('Task updated');
+    const taskId = req.params.id;
+    const updatedTask = req.body;
+    
+    await taskService.updateTask(taskId, updatedTask);
+    
+    res.json({ 
+      success: true, 
+      message: 'Task updated',
+      task: updatedTask 
+    });
   } catch (error) {
-    res.status(500).send(error instanceof Error ? error.message : 'Unknown error');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update task',
+      error: error.message 
+    });
   }
 });
 

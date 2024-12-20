@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react'
 
 type TaskProps = TaskType & {
   onEdit?: (task: TaskType) => void
+  onUpdate?: (task: TaskType) => void
 }
 
 export function Task({ 
@@ -21,7 +22,8 @@ export function Task({
   description, 
   order,
   persistent,
-  onEdit
+  onEdit,
+  onUpdate
 }: TaskProps) {
   const [isChecked, setIsChecked] = useState(completed);
 
@@ -56,21 +58,22 @@ export function Task({
     
     if (!onEdit) return;
 
-    onEdit({
-      id,
-      title,
-      scheduledTime,
-      project,
-      completed,
-      description,
-      order: order || 0,
-      persistent
-    });
+    const taskData = {
+        id,
+        title,
+        scheduledTime,
+        project,
+        completed,
+        description,
+        order: order || 0,
+        persistent
+    }
+    onEdit(taskData)
   }
 
   const handleCompletedChange = async (checked: boolean) => {
     try {
-      await taskService.updateTask({
+      const updatedTask = {
         id,
         title,
         scheduledTime,
@@ -79,7 +82,14 @@ export function Task({
         description,
         order: order || 0,
         persistent
-      });
+      }
+      
+      if (onUpdate) {
+        onUpdate(updatedTask)
+      } else {
+        await taskService.updateTask(updatedTask)
+      }
+
       // Send email notification when task is completed
       if (checked) {
         await fetch('/api/send-email', {
@@ -92,7 +102,7 @@ export function Task({
             subject: 'Task Complete!',
             content: `You have completed task "${title}" (ID: ${id})`
           })
-        });
+        })
       }
     } catch (error) {
       console.error('Failed to update task completion:', error)
@@ -122,7 +132,7 @@ export function Task({
             <div className="pt-1" >
               <Checkbox 
                 checked={isChecked}
-                onCheckedChange={setIsChecked}
+                onCheckedChange={(checked) => setIsChecked(checked === true)}
               />
             </div>
           )}

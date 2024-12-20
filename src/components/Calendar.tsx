@@ -62,8 +62,12 @@ function ScheduleView() {
   }
 
   const handleEditTask = (task: TaskType) => {
-    setTaskState(prev => ({ ...prev, taskToEdit: task }))
-    setDialogState(prev => ({ ...prev, isEditOpen: true }))
+    setTaskState(prev => {
+        return { ...prev, taskToEdit: task }
+    })
+    setDialogState(prev => {
+        return { ...prev, isEditOpen: true }
+    })
   }
 
   // CRUD Operations
@@ -127,7 +131,7 @@ function ScheduleView() {
       <TaskList
         tasks={tasks}
         onTasksReorder={handleTasksReorder}
-        onUpdate={handleTaskUpdate}
+        onTaskUpdate={handleTaskUpdate}
         onEdit={handleEditTask}
         onDelete={handleTaskDelete}
       />
@@ -147,7 +151,6 @@ function ScheduleView() {
           onOpenChange={(open) => setDialogState(prev => ({ ...prev, isEditOpen: open }))}
           task={taskToEdit}
           onTaskUpdate={handleTaskUpdate}
-          onSubmit={handleTaskUpdate}
         />
       )}
     </div>

@@ -31,22 +31,20 @@ export const taskService = {
     return response.json()
   },
 
-  async updateTask(task: TaskType): Promise<TaskType> {
-    const response = await fetch(`${API_URL}/tasks/${task.id}`, {
+  async updateTask(task: TaskType): Promise<void> {
+    const response = await fetch(`/api/tasks/${task.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(task),
-    })
+    });
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Server error response:', errorText)
-      throw new Error('Failed to update task')
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return response.json()
+    return;
   },
 
   async deleteTask(taskId: string): Promise<void> {

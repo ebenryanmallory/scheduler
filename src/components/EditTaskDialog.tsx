@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -11,7 +11,6 @@ export function EditTaskDialog({
   onOpenChange,
   task,
   onTaskUpdate,
-  onSubmit,
 }: EditTaskDialogProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description)
@@ -19,16 +18,32 @@ export function EditTaskDialog({
   const [scheduledTime, setScheduledTime] = useState(task.scheduledTime)
   const [persistent, setPersistent] = useState(task.persistent || false)
 
+  // Reset state when dialog closes or task changes
+  useEffect(() => {
+    if (open) {
+      setTitle(task.title)
+      setDescription(task.description)
+      setProject(task.project || '')
+      setScheduledTime(task.scheduledTime)
+      setPersistent(task.persistent || false)
+    }
+  }, [open, task])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
+
+    const updatedTask = {
       id: task.id,
       title,
       description,
       project: project || undefined,
       scheduledTime,
       persistent,
-    })
+      completed: task.completed
+    }
+    console.log(updatedTask)
+    onTaskUpdate(updatedTask)
+    onOpenChange(false)
   }
 
   return (
