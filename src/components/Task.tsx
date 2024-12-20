@@ -80,7 +80,20 @@ export function Task({
         order: order || 0,
         persistent
       });
-
+      // Send email notification when task is completed
+      if (checked) {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: 'ebenryanmallory@proton.me',
+            subject: 'Task Complete!',
+            content: `You have completed task "${title}" (ID: ${id})`
+          })
+        });
+      }
     } catch (error) {
       console.error('Failed to update task completion:', error)
     }
