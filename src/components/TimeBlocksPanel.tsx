@@ -3,6 +3,7 @@ import { ScheduleActivity } from '../types/schedule'
 import { scheduleActivities } from '../data/scheduleActivities'
 import { TimeBlockDetails } from './TimeBlockDetails'
 import { NestedTimeBlocks } from './NestedTimeBlocks'
+import { ChevronDown, ChevronRight } from "lucide-react"
 import { 
   formatTimeToAMPM, 
   addMinutes, 
@@ -94,13 +95,17 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-sm">
                       {formatTimeToAMPM(scheduledTime)}
-                      {activity?.duration > 30 && (
+                      {activity?.duration && activity.duration > 30 && (
                         ` - ${formatTimeToAMPM(addMinutes(scheduledTime, activity.duration))}`
                       )}
                     </span>
                     {isExpandable && (
                       <span className="text-xs text-blue-600">
-                        {expandedBlock === scheduledTime ? '▼' : '▶'}
+                        {expandedBlock === scheduledTime ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                       </span>
                     )}
                   </div>
@@ -144,4 +149,4 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
   )
 }
 
-export default TimeBlocksPanel 
+export default TimeBlocksPanel

@@ -88,7 +88,7 @@ export const scheduleActivities: ScheduleActivities = {
     ]
   },
   "13:00": {
-    activity: "Focus Work - Motion Storyline",
+    activity: "Focus Work - SparkGPU",
     duration: 240,
     tag: "focus_motion",
     slots: [

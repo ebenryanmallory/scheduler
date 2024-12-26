@@ -40,6 +40,18 @@ export function TimeBlockDetails({ time, activity }: TimeBlockDetailsProps) {
           </ul>
         </div>
       )}
+
+      {activity.actions && activity.actions.length > 0 && (
+        <div className="mt-3">
+          <ul className="space-y-1">
+            {activity.actions.map((action, index) => (
+              <li key={index} className="text-sm text-gray-400 italic">
+                {action.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 } 
