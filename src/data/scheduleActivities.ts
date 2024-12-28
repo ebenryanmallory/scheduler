@@ -40,7 +40,7 @@ export const scheduleActivities: ScheduleActivities = {
     tag: "focus_dynamic",
     slots: [
       { description: "Identify bottlenecks" },
-      { description: "List All Current Tasks" },
+      { description: "Delete, add back in, accelerate, optimize, automate" },
       { description: "Time Blocking: Effort vs. Impact High-To-Low-Priority Tasks" },
       { description: "Continuous Improvement:" },
       { description: "Documentation" },
@@ -93,7 +93,7 @@ export const scheduleActivities: ScheduleActivities = {
     tag: "focus_motion",
     slots: [
       { description: "Identify bottlenecks" },
-      { description: "List All Current Tasks" },
+      { description: "Delete, add back in, accelerate, optimize, automate" },
       { description: "Time Blocking: Effort vs. Impact High-To-Low-Priority Tasks" },
       { description: "Continuous Improvement:" },
       { description: "Documentation" },

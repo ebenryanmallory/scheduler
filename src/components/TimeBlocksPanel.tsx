@@ -7,7 +7,7 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { 
   formatTimeToAMPM, 
   addMinutes, 
-  isWeekday, 
+  isWorkday,
   generateTimeBlocks,
   createScheduledTime,
   getTimeStringFromISO
@@ -44,7 +44,7 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
 
   // Get activity for a specific time block
   const getActivityForBlock = (scheduledTime: string): ScheduleActivity | null => {
-    if (!selectedDate || !isWeekday(selectedDate)) return null
+    if (!selectedDate || !isWorkday(selectedDate)) return null
     const timeString = getTimeStringFromISO(scheduledTime)
     return scheduleActivities[timeString] || null
   }
@@ -62,8 +62,8 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
         })}
       </h2>
 
-      {!isWeekday(selectedDate) ? (
-        <p className="text-gray-500 text-sm">No schedule available for weekends</p>
+      {!isWorkday(selectedDate) ? (
+        <p className="text-gray-500 text-sm">No schedule available for Mondays and Fridays</p>
       ) : (
         <div className="space-y-2">
           {timeBlocks.map(({ time: scheduledTime }) => {

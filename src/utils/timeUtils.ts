@@ -42,9 +42,11 @@ export const formatTimeToAMPM = (timeString: string): string => {
   }
 }
 
-export const isWeekday = (date: Date) => {
+export const isWorkday = (date: Date) => {
   const day = date.getDay()
-  return day >= 1 && day <= 5
+  // Returns true for Saturday (6), Sunday (0), Tuesday (2), Wednesday (3), Thursday (4)
+  // Returns false for Monday (1) and Friday (5)
+  return day === 0 || day === 6 || (day >= 2 && day <= 4)
 }
 
 export const generateTimeBlocks = (): { time: string }[] => {

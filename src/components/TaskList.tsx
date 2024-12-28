@@ -44,7 +44,7 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
       )
     },
     {
-      name: "Motion Storyline",
+      name: "SparkGPU",
       persistentTasks: tasks.filter(task => 
         task.project === "Motion Storyline" && 
         task.persistent &&
