@@ -8,4 +8,5 @@ order: 14
 persistent: true
 ---
 
+Educate reader to set up system and understand how it works
 Read through current articles
