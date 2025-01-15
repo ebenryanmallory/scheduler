@@ -10,3 +10,4 @@ persistent: true
 
 Educate reader to set up system and understand how it works
 Read through current articles
+https://x.com/i/status/1818391436234007021

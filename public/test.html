@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Test</title>
+</head>
+<body>
+    <h1>Public Asset Test</h1>
+    <img src="/favicon.ico" alt="Favicon Test">
+    <pre id="manifest"></pre>
+
+    <script>
+        fetch('/site.webmanifest')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('manifest').textContent = 
+                    JSON.stringify(data, null, 2);
+            });
+    </script>
+</body>
+</html> 
