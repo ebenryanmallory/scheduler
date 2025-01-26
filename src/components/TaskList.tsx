@@ -14,14 +14,24 @@ import {
 } from "@dnd-kit/sortable"
 import { TaskType } from "@/types/task"
 import { SortableTask } from "./SortableTasks"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "./ui/button"
 import { TaskListProps, ProjectGroup } from "@/types/taskList"
+import { useProjectStore } from "@/store/projectStore"
 
 export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete }: TaskListProps) {
-  const [expandedProject, setExpandedProject] = useState<string>("Dynamic Momentum")
+  const { getDisplayProjects } = useProjectStore()
+  const [expandedProject, setExpandedProject] = useState<string>("")
   
+  useEffect(() => {
+    // Set first project as expanded by default
+    const projects = getDisplayProjects()
+    if (projects.length > 0) {
+      setExpandedProject(projects[0].title)
+    }
+  }, [getDisplayProjects])
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -29,33 +39,23 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
     })
   )
 
-  // Group tasks by project, separating persistent and regular tasks
-  const projectGroups: ProjectGroup[] = [
-    {
-      name: "Dynamic Momentum",
-      persistentTasks: tasks.filter(task => 
-        task.project === "Dynamic Momentum" && 
+  // Get only the first two projects (morning and afternoon)
+  const activeProjects = getDisplayProjects().slice(0, 2)
+
+  const projectGroups: ProjectGroup[] = activeProjects.map(project => ({
+    name: project.title,
+    persistentTasks: tasks.filter(task => {
+      const isPersistent = task.project === project.title && 
         task.persistent &&
-        !task.completed
-      ),
-      regularTasks: tasks.filter(task => 
-        task.project === "Dynamic Momentum" && 
-        (!task.persistent || task.completed)
-      )
-    },
-    {
-      name: "SparkGPU",
-      persistentTasks: tasks.filter(task => 
-        task.project === "Motion Storyline" && 
-        task.persistent &&
-        !task.completed
-      ),
-      regularTasks: tasks.filter(task => 
-        task.project === "Motion Storyline" && 
-        (!task.persistent || task.completed)
-      )
-    }
-  ]
+        !task.completed;
+      return isPersistent;
+    }),
+    regularTasks: tasks.filter(task => {
+      const isRegular = task.project === project.title && 
+        (!task.persistent || task.completed);
+      return isRegular;
+    })
+  }))
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -84,7 +84,10 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
     >
       <div className="space-y-4">
         {projectGroups
-          .filter(group => group.persistentTasks.length > 0 || group.regularTasks.length > 0)
+          .filter(group => {
+            const hasItems = group.persistentTasks.length > 0 || group.regularTasks.length > 0;
+            return hasItems;
+          })
           .map((group) => (
             <div key={group.name} className="border rounded-lg p-2">
               <Button

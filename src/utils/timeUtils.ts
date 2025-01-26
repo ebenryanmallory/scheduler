@@ -29,8 +29,20 @@ export const formatTimeToAMPM = (timeString: string): string => {
       hours = date.getHours()
       minutes = date.getMinutes()
     } else {
-      // Handle "HH:mm" format
-      [hours, minutes] = timeString.split(':').map(Number)
+      // Handle "HH:mm" or "H:mm" format
+      const parts = timeString.split(':')
+      if (parts.length !== 2) {
+        // Handle single number case
+        hours = parseInt(timeString, 10)
+        minutes = 0
+        if (isNaN(hours)) throw new Error('Invalid time format')
+      } else {
+        [hours, minutes] = parts.map(Number)
+      }
+    }
+
+    if (isNaN(hours) || isNaN(minutes)) {
+      throw new Error('Invalid hours or minutes')
     }
 
     const period = hours >= 12 ? 'PM' : 'AM'
@@ -55,8 +67,7 @@ export const generateTimeBlocks = (): { time: string }[] => {
   today.setHours(6, 0, 0, 0) // Start at 6 AM
 
   for (let i = 0; i < 32; i++) { // 16 hours * 2 blocks per hour
-    const time = today.toISOString()
-    blocks.push({ time })
+    blocks.push({ time: today.toISOString() })
     today.setMinutes(today.getMinutes() + 30)
   }
   return blocks
@@ -93,6 +104,11 @@ export const getTimeStringFromISO = (isoString: string): string => {
     if (isNaN(date.getTime())) {
       // If it's already in HH:mm format, return as is
       if (isoString.match(/^\d{2}:\d{2}$/)) return isoString
+      // Handle single digit case
+      if (isoString.match(/^\d+$/)) {
+        const hours = parseInt(isoString, 10)
+        return `${hours.toString().padStart(2, '0')}:00`
+      }
       throw new Error('Invalid date')
     }
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`

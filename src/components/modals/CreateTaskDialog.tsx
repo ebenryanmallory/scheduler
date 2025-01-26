@@ -6,61 +6,88 @@ import { TaskType } from "@/types/task"
 import { CreateTaskDialogProps, ProjectName } from "@/types/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatTimeToAMPM, addMinutes, createScheduledTime, getTimeStringFromISO } from "@/utils/timeUtils"
-import { PROJECTS } from '@/config/projects'
 import { Checkbox } from "@/components/ui/checkbox"
+import { useTaskStore } from "@/store/taskStore"
+import { useProjectStore } from "@/store/projectStore"
 
 function CreateTaskDialog({ 
   open, 
   onOpenChange, 
-  selectedDate, 
-  selectedTimeBlock,
-  onTaskCreate,
+  selectedDate,
   selectedTime 
 }: CreateTaskDialogProps) {
+  const { addTask, selectedDate: storeDate } = useTaskStore()
+  const { getDisplayProjects } = useProjectStore()
   const [title, setTitle] = useState("")
   const [project, setProject] = useState<ProjectName | "">("")
   const [persistent, setPersistent] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Use store date as fallback
+  const effectiveDate = selectedDate || storeDate
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!selectedDate || !selectedTime) return
+    if (!effectiveDate || !selectedTime) return
 
-    const formattedTime = selectedTime.includes('T') 
-      ? getTimeStringFromISO(selectedTime)
-      : selectedTime
+    try {
+      // Format the time consistently using the same logic as display time
+      const formattedTime = selectedTime.includes('T') 
+        ? getTimeStringFromISO(selectedTime)
+        : selectedTime.includes(':') 
+          ? selectedTime 
+          : `${selectedTime.padStart(2, '0')}:00`
 
-    console.log('Debug values:', {
-      selectedDate,
-      selectedTime,
-      formattedTime,
-      result: createScheduledTime(selectedDate, formattedTime)
-    });
-
-    const [hours, minutes] = formattedTime.split(':').map(Number)
-    const taskDateTime = new Date(selectedDate)
-    taskDateTime.setHours(hours, minutes)
-    
-    const newTask: TaskType = {
-      id: crypto.randomUUID(),
-      title,
-      scheduledTime: createScheduledTime(selectedDate, formattedTime),
-      completed: false,
-      description: '',
-      project: project || undefined,
-      persistent
+      const newTask: TaskType = {
+        id: crypto.randomUUID(),
+        title,
+        scheduledTime: createScheduledTime(effectiveDate, formattedTime),
+        completed: false,
+        description: '',
+        project: project || undefined,
+        persistent
+      }
+      
+      await addTask(newTask)
+      setTitle("")
+      setProject("")
+      setPersistent(false)
+      onOpenChange(false)
+    } catch (error) {
+      // Keep this error log for production error handling
+      console.error('Failed to create task:', error)
     }
-    
-    onTaskCreate(newTask)
-    setTitle("")
-    setProject("")
-    setPersistent(false)
-    onOpenChange(false)
   }
 
-  const displayTime = selectedTime ? (
-    `${formatTimeToAMPM(selectedTime)} - ${formatTimeToAMPM(addMinutes(selectedTime, 30))}`
-  ) : ''
+  // Format display time safely
+  const displayTime = selectedTime ? (() => {
+    try {
+      if (!selectedTime) return ''
+      
+      // Get start time in HH:mm format
+      const startTime = selectedTime.includes('T') 
+        ? getTimeStringFromISO(selectedTime)
+        : selectedTime.includes(':') 
+          ? selectedTime 
+          : `${selectedTime.padStart(2, '0')}:00`
+      
+      // Calculate end time
+      const [hours, minutes] = startTime.split(':').map(Number)
+      if (isNaN(hours) || isNaN(minutes)) {
+        throw new Error('Invalid time format')
+      }
+      
+      const endDate = new Date()
+      endDate.setHours(hours, minutes + 30)
+      const endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`
+      
+      return `${formatTimeToAMPM(startTime)} - ${formatTimeToAMPM(endTime)}`
+    } catch (error) {
+      return ''
+    }
+  })() : ''
+
+  const availableProjects = getDisplayProjects()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,7 +98,7 @@ function CreateTaskDialog({
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <p className="text-sm text-gray-500 mb-2">
-              {selectedDate?.toLocaleDateString('en-US', { 
+              {effectiveDate?.toLocaleDateString('en-US', { 
                 month: 'long', 
                 day: 'numeric', 
                 year: 'numeric' 
@@ -94,9 +121,9 @@ function CreateTaskDialog({
               <SelectValue placeholder="Select project (optional)" />
             </SelectTrigger>
             <SelectContent>
-              {PROJECTS.map(({ name }) => (
-                <SelectItem key={name} value={name}>
-                  {name}
+              {availableProjects.map((project) => (
+                <SelectItem key={project.id} value={project.title}>
+                  {project.title}
                 </SelectItem>
               ))}
             </SelectContent>

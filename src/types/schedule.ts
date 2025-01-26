@@ -1,23 +1,23 @@
-import { TaskType } from './task'
-
-export interface Schedule {
-  date: Date
-  tasks: TaskType[]
-  // Add any new schedule-related properties here if necessary
-}
+import type { TaskType } from "./task"
 
 export interface ScheduleViewProps {
-  selectedDate?: Date | null;
-  onDateSelect: (date: Date) => void;
-} 
-export interface TimeBlock {
-  time: string  // ISO string
-  activity?: string
-  duration?: number
-  actions?: ScheduleAction[]
+  selectedDate: Date | null
+  onDateSelect: (date: Date) => void
+  onTimeBlockSelect: (block: number | undefined) => void
 }
 
-export interface ScheduleAction {
+export interface DialogState {
+  isEditOpen: boolean
+  taskToEdit: TaskType | null
+  selectedTimeBlock: number
+  selectedTime: string | undefined
+}
+
+export interface ActivitySlot {
+  description: string
+}
+
+export interface Action {
   type: string
   message: string
   channels?: string[]
@@ -26,32 +26,14 @@ export interface ScheduleAction {
   mode?: string
 }
 
-export interface ActivitySlot {
-  description: string
-}
-
 export interface ScheduleActivity {
   activity: string
   duration?: number
-  actions?: ScheduleAction[]
   tag?: string
   slots?: ActivitySlot[]
-  description?: string
+  actions?: Action[]
 }
 
-export type ScheduleActivities = Record<string, ScheduleActivity>
-
-// Props types for components
-export interface TimeBlockDetailsProps {
-  time: string  // ISO string
-  activity: ScheduleActivity
-}
-
-export interface NestedTimeBlocksProps {
-  startTime: string  // ISO string
-  duration: number
-  onAddTask: (blockIndex: number, time: string) => void
-  timeBlocks: TimeBlock[]
-  tasks: TaskType[]
-  parentActivity: ScheduleActivity
+export interface ScheduleActivities {
+  [time: string]: ScheduleActivity
 }

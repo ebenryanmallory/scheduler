@@ -1,25 +1,32 @@
 import { Button } from '@/components/ui/button'
-import { formatTimeToAMPM, addMinutes } from '@/utils/timeUtils'
+import { formatTimeToAMPM, addMinutes, getTimeStringFromISO } from '@/utils/timeUtils'
 import { TaskType } from "@/types/task"
 import { Badge } from '@/components/ui/badge'
-import { getProjectColor } from '@/config/projects'
+import { useProjectStore } from '@/store/projectStore'
 import { NestedTimeBlocksProps } from '@/types/timeBlock'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useTaskStore } from '@/store/taskStore'
 
 export function NestedTimeBlocks({ 
   startTime, 
   duration, 
-  onAddTask,
-  onUpdateTask,
   timeBlocks,
   parentActivity,
   tasks = []
 }: NestedTimeBlocksProps) {
+  const { updateTask, setCreateDialogOpen, setSelectedTimeBlock, setSelectedTime } = useTaskStore()
+  const { getProjectColor } = useProjectStore()
+
   const handleAddTask = (currentTime: string) => {
     try {
       const blockIndex = timeBlocks.findIndex(b => b?.time === currentTime)
       if (blockIndex !== -1) {
-        onAddTask(blockIndex, currentTime)
+        // Convert ISO string to HH:mm format for the store
+        const formattedTime = getTimeStringFromISO(currentTime)
+        
+        setSelectedTimeBlock(blockIndex)
+        setSelectedTime(formattedTime)
+        setCreateDialogOpen(true)
       } else {
         console.error('No matching time block found for:', currentTime)
       }
@@ -30,9 +37,7 @@ export function NestedTimeBlocks({
 
   const handleCompletedChange = async (task: TaskType, completed: boolean) => {
     try {
-      if (onUpdateTask) {
-        await onUpdateTask(task.id, { ...task, completed });
-      }
+      await updateTask(task.id, { ...task, completed });
 
       if (completed && task.project) {
         const response = await fetch('/api/send-email', {
@@ -67,7 +72,7 @@ export function NestedTimeBlocks({
   };
 
   const renderTimeBlock = (currentTime: string, description: string, task?: TaskType) => {
-    const projectColors = task?.project ? getProjectColor(task.project) : null
+    const projectColor = task?.project ? getProjectColor(task.project) : null
     
     return (
       <div 
@@ -100,10 +105,10 @@ export function NestedTimeBlocks({
                 }`}>
                   {task.title}
                 </span>
-                {task.project && projectColors && (
+                {task.project && projectColor && (
                   <Badge 
                     variant="secondary" 
-                    className={`text-xs px-2 py-0.5 ${projectColors.background} ${projectColors.text}`}
+                    className={projectColor}
                   >
                     {task.project}
                   </Badge>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ScheduleActivity } from '../types/schedule'
+import { ScheduleActivity, ScheduleActivities } from '../types/schedule'
 import { scheduleActivities } from '../data/scheduleActivities'
 import { TimeBlockDetails } from './TimeBlockDetails'
 import { NestedTimeBlocks } from './NestedTimeBlocks'
@@ -13,6 +13,7 @@ import {
   getTimeStringFromISO
 } from '../utils/timeUtils'
 import { TaskType } from '@/types/task'
+import { useProjectStore } from '@/store/projectStore'
 
 interface TimeBlocksPanelProps {
   selectedDate: Date | null
@@ -23,14 +24,16 @@ interface TimeBlocksPanelProps {
 function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProps) {
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null)
   const [expandedBlock, setExpandedBlock] = useState<string | null>(null)
+  const { getDisplayProjects } = useProjectStore()
 
   const timeBlocks = generateTimeBlocks()
+  const projects = getDisplayProjects()
 
   // Helper to check if a time falls within a duration block
   const isWithinDurationBlock = (scheduledTime: string): boolean => {
     if (!selectedDate) return false
     
-    for (const [blockTime, activity] of Object.entries(scheduleActivities)) {
+    for (const [blockTime, activity] of Object.entries(scheduleActivities as ScheduleActivities)) {
       if (activity.duration) {
         const blockScheduledTime = createScheduledTime(selectedDate, blockTime)
         const blockEndTime = addMinutes(blockScheduledTime, activity.duration)
@@ -46,7 +49,22 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
   const getActivityForBlock = (scheduledTime: string): ScheduleActivity | null => {
     if (!selectedDate || !isWorkday(selectedDate)) return null
     const timeString = getTimeStringFromISO(scheduledTime)
-    return scheduleActivities[timeString] || null
+    const activity = scheduleActivities[timeString] as ScheduleActivity | undefined
+    
+    // If this is a 4-hour focus block, update the activity name with the project
+    if (activity && activity.duration === 240) {
+      const isMorningBlock = timeString === "08:00"
+      const project = projects[isMorningBlock ? 0 : 1] // Morning project is first, afternoon is second
+      
+      if (project) {
+        return {
+          ...activity,
+          activity: `Focus Work - ${project.title}`
+        }
+      }
+    }
+    
+    return activity || null
   }
 
   if (!selectedDate) return null

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Textarea } from './ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Textarea } from '../ui/textarea'
 import { Checkbox } from "@/components/ui/checkbox"
 import { EditTaskDialogProps } from '@/types/editTaskDialog'
+import { ProjectName, useProjectStore } from '@/store/projectStore'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 
 export function EditTaskDialog({
   open,
@@ -14,16 +16,18 @@ export function EditTaskDialog({
 }: EditTaskDialogProps) {
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description)
-  const [project, setProject] = useState(task.project || '')
+  const [project, setProject] = useState<ProjectName | undefined>(task.project)
   const [scheduledTime, setScheduledTime] = useState(task.scheduledTime)
   const [persistent, setPersistent] = useState(task.persistent || false)
-
+  
+  const { getDisplayProjects } = useProjectStore()
+  const projects = getDisplayProjects();
   // Reset state when dialog closes or task changes
   useEffect(() => {
     if (open) {
       setTitle(task.title)
       setDescription(task.description)
-      setProject(task.project || '')
+      setProject(task.project)
       setScheduledTime(task.scheduledTime)
       setPersistent(task.persistent || false)
     }
@@ -36,10 +40,11 @@ export function EditTaskDialog({
       id: task.id,
       title,
       description,
-      project: project || undefined,
+      project,
       scheduledTime,
       persistent,
-      completed: task.completed
+      completed: task.completed,
+      date: task.date
     }
     onTaskUpdate(updatedTask)
     onOpenChange(false)
@@ -47,7 +52,7 @@ export function EditTaskDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
@@ -59,19 +64,32 @@ export function EditTaskDialog({
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
+          {!persistent && (
+            <div>
+              <Input
+                type="datetime-local"
+                value={scheduledTime?.slice(0, 16) || ''}
+                onChange={(e) => setScheduledTime(new Date(e.target.value).toISOString())}
+              />
+            </div>
+          )}
           <div>
-            <Input
-              type="datetime-local"
-              value={scheduledTime.slice(0, 16)} // Format datetime for input
-              onChange={(e) => setScheduledTime(new Date(e.target.value).toISOString())}
-            />
-          </div>
-          <div>
-            <Input
-              placeholder="Project (optional)"
-              value={project}
-              onChange={(e) => setProject(e.target.value)}
-            />
+            <Select 
+              value={project || "no-project"} 
+              onValueChange={(value) => setProject(value === "no-project" ? undefined : value as ProjectName)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a project (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="no-project">No Project</SelectItem>
+                {projects.map((p) => (
+                  <SelectItem key={p.id} value={p.title}>
+                    {p.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Textarea

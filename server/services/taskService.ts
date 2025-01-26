@@ -22,7 +22,13 @@ export class TaskService {
 
   async listFiles(): Promise<string[]> {
     const files = await fs.readdir(path.join(process.cwd(), './src/docs'))
-    return files.filter(file => file.endsWith('.md'))
+    // Only return files that match our task file pattern (UUID.md)
+    return files.filter(file => {
+      // Match files that are UUID.md format
+      // UUID pattern: 8-4-4-4-12 hex digits
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.md$/i
+      return uuidPattern.test(file)
+    })
   }
 
   async createTask(task: Task): Promise<void> {
