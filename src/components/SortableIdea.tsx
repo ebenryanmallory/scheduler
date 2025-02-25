@@ -56,7 +56,7 @@ export function SortableIdea({ id, title, description, project, createdAt, onUpd
           </Button>
         </div>
         {description && (
-          <p className="text-sm text-muted-foreground truncate">{description}</p>
+          <p className="text-sm text-muted-foreground truncate max-w-[250px] overflow-hidden text-ellipsis">{description}</p>
         )}
         {project && (
           <div className="flex gap-2 mt-1">

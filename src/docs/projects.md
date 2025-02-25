@@ -1,7 +1,7 @@
 ---
-id: spark-gpu
-title: Spark GPU
-color: bg-blue-100 text-blue-800
+id: dynamic-momentum
+title: Dynamic Momentum
+color: bg-purple-100 text-purple-800
 order: 0
 ---
 
@@ -13,8 +13,8 @@ order: 1
 ---
 
 ---
-id: dynamic-momentum
-title: Dynamic Momentum
-color: bg-purple-100 text-purple-800
+id: spark-gpu
+title: Spark GPU
+color: bg-blue-100 text-blue-800
 order: 2
 ---

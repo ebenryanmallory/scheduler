@@ -24,10 +24,6 @@ export function TimeBlockDetails({ time, activity }: TimeBlockDetailsProps) {
         </p>
       )}
       
-      {activity.description && (
-        <p className="text-sm mt-2">{activity.description}</p>
-      )}
-
       {activity.slots && activity.slots.length > 0 && (
         <div className="mt-3">
           <h4 className="text-sm font-medium text-gray-700 mb-2">Time Slots:</h4>
