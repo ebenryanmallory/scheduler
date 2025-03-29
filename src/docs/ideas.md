@@ -47,15 +47,3 @@ order: 3
 ---
 
 Send Luisa render to flux API
-
----
-
----
-id: 6486d232-756d-4f59-9e03-5db31139614e
-title: Wearable Foam
-createdAt: 2025-01-18T19:13:32.224Z
-project: Dynamic Momentum
-order: 4
----
-
-Expanding mechanism
