@@ -1,20 +1,33 @@
 {
-  "name": "Personal Scheduler",
+  "name": "AI-Powered Personal Scheduler",
   "short_name": "Scheduler",
+  "description": "A scheduling app for managing tasks and time blocks using markdown and Git synchronization",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7e22ce",
   "icons": [
-    {
-      "src": "/favicon.png",
-      "sizes": "16x16",
-      "type": "image/png"
-    },
     {
       "src": "/favicon.png",
       "sizes": "32x32",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "start_url": "/"
-} 
+  ]
+}
