@@ -42,7 +42,7 @@ function App() {
     <div className="min-h-screen bg-background">
       <header className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 py-4 sm:py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="flex items-center">
+          <div className="flex items-center justify-between">
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-900 to-gray-800 bg-clip-text text-transparent">
               {greeting}
             </h1>
