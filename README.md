@@ -1,4 +1,4 @@
-# AI-Powered Personal Scheduler
+# Calendar driven task organizer
 
 A personal task management and scheduling application built with modern web technologies, created through AI pair programming using Cursor editor. This app leverages the power of shadcn/ui components while maintaining a simple, file-based storage system using markdown.
 

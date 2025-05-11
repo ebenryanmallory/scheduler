@@ -17,14 +17,16 @@ import { Plus } from "lucide-react"
 import { Button } from "./ui/button"
 import { useProjectStore } from "@/store/projectStore"
 import { SortableProject } from "./SortableProject"
+import CreateProjectDialog from "./modals/CreateProjectDialog"
 
 function ProjectsWidget() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const { 
     isLoading, 
     error, 
     fetchProjects, 
     getDisplayProjects,
-    reorderProjects 
+    reorderProjects
   } = useProjectStore()
 
   useEffect(() => {
@@ -91,6 +93,7 @@ function ProjectsWidget() {
           size="sm"
           variant="ghost"
           className="h-8 w-8 p-0"
+          onClick={() => setIsDialogOpen(true)}
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -115,6 +118,11 @@ function ProjectsWidget() {
           </div>
         </SortableContext>
       </DndContext>
+      
+      <CreateProjectDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+      />
     </div>
   )
 }
