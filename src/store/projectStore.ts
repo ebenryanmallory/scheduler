@@ -33,9 +33,12 @@ interface ProjectStore {
   defaultProjects: Project[]
   getProjectColor: (projectName: string) => string
   fetchProjects: () => Promise<void>
+  createProject: (id: string, project: Partial<Project>) => Promise<void>
   updateProject: (id: string, project: Partial<Project>) => Promise<void>
   reorderProjects: (projects: Project[]) => Promise<void>
   getDisplayProjects: () => Project[]
+  deleteProject: (id: string) => Promise<void>
+  editProject: (project: Project) => Promise<void>
 }
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
@@ -45,7 +48,10 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   error: null,
 
   getProjectColor: (projectName: string) => {
-    const { projects, defaultProjects } = get()
+    const state = get()
+    const projects = Array.isArray(state.projects) ? state.projects : []
+    const defaultProjects = Array.isArray(state.defaultProjects) ? state.defaultProjects : []
+    
     const project = [...projects, ...defaultProjects].find(
       p => p.title === projectName
     )
@@ -73,14 +79,38 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     }
   },
 
+  createProject: async (id: string, project: Partial<Project>) => {
+    try {
+      const createdProject = await projectService.createProject(id, project)
+      set((state) => ({
+        projects: [...state.projects, createdProject]
+      }))
+    } catch (error) {
+      set({ error: (error as Error).message })
+    }
+  },
+
   updateProject: async (id: string, project: Partial<Project>) => {
     try {
       const updatedProject = await projectService.updateProject(id, project)
-      set((state) => ({
-        projects: state.projects.map((p) => 
-          p.id === updatedProject.id ? updatedProject : p
-        )
-      }))
+      set((state) => {
+        // Check if the project already exists
+        const existingProjectIndex = state.projects.findIndex(p => p.id === updatedProject.id)
+        
+        if (existingProjectIndex >= 0) {
+          // Update existing project
+          return {
+            projects: state.projects.map((p) => 
+              p.id === updatedProject.id ? updatedProject : p
+            )
+          }
+        } else {
+          // Add new project
+          return {
+            projects: [...state.projects, updatedProject]
+          }
+        }
+      })
     } catch (error) {
       set({ error: (error as Error).message })
     }
@@ -90,6 +120,28 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     try {
       const reorderedProjects = await projectService.reorderProjects(projects)
       set({ projects: reorderedProjects })
+    } catch (error) {
+      set({ error: (error as Error).message })
+    }
+  },
+
+  deleteProject: async (id: string) => {
+    try {
+      await projectService.deleteProject(id)
+      set((state) => ({
+        projects: state.projects.filter(p => p.id !== id)
+      }))
+    } catch (error) {
+      set({ error: (error as Error).message })
+    }
+  },
+
+  editProject: async (project: Project) => {
+    try {
+      await projectService.updateProject(project.id, project)
+      // Fetch fresh projects after update to ensure we have latest data
+      const updatedProjects = await projectService.fetchProjects()
+      set({ projects: updatedProjects })
     } catch (error) {
       set({ error: (error as Error).message })
     }

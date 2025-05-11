@@ -18,9 +18,9 @@ export default defineConfig({
       },
       includeAssets: ['favicon.png', 'icons/*.png'],
       manifest: {
-        name: "AI-Powered Personal Scheduler",
-        short_name: "Scheduler",
-        description: "A scheduling app for managing tasks and time blocks using markdown and Git synchronization",
+        name: "Calendar driven task organizer",
+        short_name: "organizer",
+        description: "A calendar driven app for managing tasks and time blocks using markdown",
         start_url: "/",
         scope: "/",
         display: "standalone",
