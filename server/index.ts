@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { TaskService } from './services/taskService';
 import { IdeaService } from './services/ideaService';
-import { Resend } from 'resend';
 import dotenv from 'dotenv';
 import projectRoutes from './routes/projects'
 dotenv.config();
@@ -10,8 +9,6 @@ dotenv.config();
 const app = express();
 const taskService = new TaskService();
 const ideaService = new IdeaService();
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.FROM_EMAIL;
 
 app.use(cors());
 app.use(express.json());
@@ -86,28 +83,6 @@ app.delete('/api/tasks/:id', async (req: Request, res: Response) => {
       message: 'Failed to delete task',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
-  }
-});
-
-app.post('/api/send-email', async (req: Request, res: Response) => {
-  try {
-    const { to, subject, content } = req.body;
-
-    if (!to || !subject || !content) {
-      return res.status(400).send('Missing required fields: to, subject, and content are required.');
-    }
-
-    const data = await resend.emails.send({
-      from: FROM_EMAIL || 'no-reply@example.com',
-      to,
-      subject,
-      html: content,
-    });
-
-    res.status(200).json({ message: 'Email sent successfully', data });
-  } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).send(error instanceof Error ? error.message : 'Failed to send email');
   }
 });
 

@@ -18,7 +18,6 @@ router.get('/', async (req, res) => {
 router.post('/reorder', async (req, res) => {
   try {
     const newOrder = req.body
-    console.log('Received reorder request:', newOrder) // Debug log
 
     if (!Array.isArray(newOrder)) {
       console.error('Invalid request body:', newOrder) // Debug log
@@ -36,8 +35,7 @@ router.post('/reorder', async (req, res) => {
       return res.status(400).json({ error: 'Invalid project data in array' })
     }
 
-    const reorderedProjects = await projectService.reorderProjects(newOrder)
-    console.log('Reordered projects:', reorderedProjects) // Debug log
+    await projectService.reorderProjects(newOrder)
 
     // Return the reordered array directly
     res.json(newOrder)
