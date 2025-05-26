@@ -11,7 +11,7 @@ export const ideaService = {
     return response.json()
   },
 
-  async createIdea(idea: Omit<IdeaType, 'id' | 'createdAt'>): Promise<IdeaType> {
+  async createIdea(idea: Omit<IdeaType, 'createdAt'>): Promise<IdeaType> {
     const response = await fetch(`${API_URL}/ideas`, {
       method: 'POST',
       headers: {

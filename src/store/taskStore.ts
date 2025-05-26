@@ -47,19 +47,22 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   addTask: async (task: TaskType) => {
     set({ isLoading: true, error: null });
     try {
-      const selectedDate = get().selectedDate;
-      const selectedTime = get().selectedTime;
+      const state = get();
+      const { selectedDate, selectedTime } = state;
       
       if (!selectedDate || !selectedTime) {
         throw new Error('Missing required date/time for task creation');
       }
       
       const newTask = await taskService.createTask(task, selectedDate);
-      set((state) => ({ 
-        tasks: [...state.tasks, newTask],
+      
+      // Only update what we need to after successful task creation
+      set((currentState) => ({
+        tasks: [...currentState.tasks, newTask],
         isLoading: false,
         isCreateDialogOpen: false,
-        selectedTime: undefined,
+        // Clear selection state only after successful creation
+        selectedTime: null,
         selectedDate: null
       }));
     } catch (error) {

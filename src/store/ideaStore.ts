@@ -13,7 +13,7 @@ interface IdeaStore {
   reorderIdeas: (ideas: IdeaType[]) => Promise<void>
 }
 
-export const useIdeaStore = create<IdeaStore>((set, get) => ({
+export const useIdeaStore = create<IdeaStore>((set) => ({
   ideas: [],
   isLoading: false,
   error: null,
@@ -30,14 +30,20 @@ export const useIdeaStore = create<IdeaStore>((set, get) => ({
 
   addIdea: async (idea) => {
     set({ isLoading: true, error: null })
+    
     try {
       const newIdea = await ideaService.createIdea(idea)
+      
+      // Update state only once with the new idea from the server
       set(state => ({
         ideas: [...state.ideas, newIdea],
         isLoading: false
       }))
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false })
+      set({
+        error: (error as Error).message,
+        isLoading: false
+      })
     }
   },
 
