@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import ScheduleView from './components/ScheduleView'
 import CreateTaskDialog from './components/modals/CreateTaskDialog'
 import packageJson from '../package.json'
