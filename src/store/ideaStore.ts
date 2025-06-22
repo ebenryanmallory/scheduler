@@ -13,7 +13,7 @@ interface IdeaStore {
   reorderIdeas: (ideas: IdeaType[]) => Promise<void>
 }
 
-export const useIdeaStore = create<IdeaStore>((set) => ({
+export const useIdeaStore = create<IdeaStore>((set, get) => ({
   ideas: [],
   isLoading: false,
   error: null,
@@ -32,13 +32,11 @@ export const useIdeaStore = create<IdeaStore>((set) => ({
     set({ isLoading: true, error: null })
     
     try {
-      const newIdea = await ideaService.createIdea(idea)
+      // Create the idea on the server
+      await ideaService.createIdea(idea)
       
-      // Update state only once with the new idea from the server
-      set(state => ({
-        ideas: [...state.ideas, newIdea],
-        isLoading: false
-      }))
+      // Refresh the entire ideas list from the server to ensure sync
+      await get().fetchIdeas()
     } catch (error) {
       set({
         error: (error as Error).message,

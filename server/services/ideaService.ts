@@ -35,14 +35,18 @@ export class IdeaService {
   async createIdea(idea: Omit<Idea, 'id' | 'createdAt'>): Promise<Idea> {
     const ideas = await this.getAllIdeas()
     const newIdea: Idea = {
-      ...idea,
       id: crypto.randomUUID(),
+      title: idea.title,
+      description: idea.description,
+      project: idea.project,
       createdAt: new Date().toISOString(),
       order: ideas.length
     }
 
     ideas.push(newIdea)
     await this.saveIdeas(ideas)
+    
+    // Return the complete idea object so frontend can update state immediately
     return newIdea
   }
 
@@ -96,28 +100,41 @@ export class IdeaService {
       `id: ${idea.id}`,
       `title: ${idea.title}`,
       `createdAt: ${idea.createdAt}`,
-      idea.project ? `project: ${idea.project}` : null,
+      idea.project ? `project: ${idea.project}` : 'project: ',
       `order: ${idea.order ?? 0}`,
       '---'
-    ].filter(Boolean).join('\n')
+    ].join('\n')
 
     return `${frontMatter}\n\n${idea.description || ''}`
   }
 
   private parseIdeasMarkdown(content: string): Idea[] {
+    if (!content.trim()) {
+      return []
+    }
+
     const ideaSections = content.split('\n\n---\n\n')
     return ideaSections
       .filter(section => section.trim())
       .map(section => {
-        const [frontMatter, description = ''] = section.split('\n\n')
+        const normalizedSection = section.replace(/\r\n/g, '\n').trim()
+        const frontMatterRegex = /^---\s*([\s\S]*?)\s*---\s*([\s\S]*)?$/
+        const match = normalizedSection.match(frontMatterRegex)
+        
+        if (!match) {
+          console.error('Failed to parse idea section:', normalizedSection)
+          throw new Error('Invalid idea markdown format')
+        }
+
+        const [, frontMatter, description = ''] = match
         const metadata: Record<string, string> = {}
 
         frontMatter
           .split('\n')
-          .filter(line => line.trim() && !line.startsWith('---'))
+          .filter(line => line.trim())
           .forEach(line => {
             const [key, ...valueParts] = line.split(':')
-            if (key && valueParts.length > 0) {
+            if (key && valueParts.length >= 0) {
               metadata[key.trim()] = valueParts.join(':').trim()
             }
           })
