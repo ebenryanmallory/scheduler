@@ -1,14 +1,21 @@
 ---
-id: motion-storyline
-title: Motion Storyline
-color: bg-blue-100 text-blue-800
-order: 1
+id: storyline-forge
+title: Storyline Forge
+color: bg-emerald-100 text-emerald-800
+order: 0
 ---
 
 ---
 id: spark-gpu
 title: Spark GPU
 color: bg-amber-100 text-amber-800
+order: 1
+---
+
+---
+id: smartfit-academy
+title: Smartfit Academy
+color: bg-rose-100 text-rose-800
 order: 2
 ---
 
@@ -20,15 +27,15 @@ order: 3
 ---
 
 ---
-id: credentials
-title: Credentials
-color: bg-cyan-100 text-cyan-800
+id: motion-storyline
+title: Motion Storyline
+color: bg-blue-100 text-blue-800
 order: 4
 ---
 
 ---
-id: smartfit-academy
-title: Smartfit Academy
-color: bg-rose-100 text-rose-800
+id: credentials
+title: Credentials
+color: bg-cyan-100 text-cyan-800
 order: 5
 ---
