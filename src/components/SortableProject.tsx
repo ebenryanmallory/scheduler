@@ -7,12 +7,12 @@ import { useState } from "react"
 import { Input } from "./ui/input"
 
 const COLOR_OPTIONS = [
-  { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Blue' },
-  { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Purple' },
-  { bg: 'bg-emerald-100', text: 'text-emerald-800', label: 'Emerald' },
-  { bg: 'bg-rose-100', text: 'text-rose-800', label: 'Rose' },
-  { bg: 'bg-amber-100', text: 'text-amber-800', label: 'Amber' },
-  { bg: 'bg-cyan-100', text: 'text-cyan-800', label: 'Cyan' },
+  { bg: 'bg-pink-100', text: 'text-gray-700', label: 'Pastel Pink' },
+  { bg: 'bg-blue-100', text: 'text-orange-600', label: 'Pastel Blue' },
+  { bg: 'bg-purple-100', text: 'text-lime-600', label: 'Pastel Purple' },
+  { bg: 'bg-orange-100', text: 'text-blue-700', label: 'Pastel Orange' },
+  { bg: 'bg-teal-100', text: 'text-pink-600', label: 'Pastel Teal' },
+  { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Gray' },
 ]
 
 interface SortableProjectProps extends Project {}
