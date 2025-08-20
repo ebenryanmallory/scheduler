@@ -8,10 +8,10 @@ import { Input } from "./ui/input"
 
 const COLOR_OPTIONS = [
   { bg: 'bg-pink-100', text: 'text-gray-700', label: 'Pastel Pink' },
-  { bg: 'bg-blue-100', text: 'text-orange-600', label: 'Pastel Blue' },
-  { bg: 'bg-purple-100', text: 'text-lime-600', label: 'Pastel Purple' },
+  { bg: 'bg-blue-100', text: 'text-slate-600', label: 'Pastel Blue' },
+  { bg: 'bg-purple-100', text: 'text-slate-600', label: 'Pastel Purple' },
   { bg: 'bg-orange-100', text: 'text-blue-700', label: 'Pastel Orange' },
-  { bg: 'bg-teal-100', text: 'text-pink-600', label: 'Pastel Teal' },
+  { bg: 'bg-teal-100', text: 'text-pink-800', label: 'Pastel Teal' },
   { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Gray' },
 ]
 
