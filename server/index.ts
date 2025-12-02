@@ -4,6 +4,7 @@ import { TaskService } from './services/taskService';
 import { IdeaService } from './services/ideaService';
 import dotenv from 'dotenv';
 import projectRoutes from './routes/projects'
+import docsRoutes from './routes/docs'
 dotenv.config();
 
 const app = express();
@@ -171,6 +172,7 @@ app.delete('/api/ideas/:id', async (req: Request, res: Response) => {
 });
 
 app.use('/api/projects', projectRoutes)
+app.use('/api/docs', docsRoutes)
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

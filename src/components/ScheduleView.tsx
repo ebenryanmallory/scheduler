@@ -7,6 +7,8 @@ import { EditTaskDialog } from './modals/EditTaskDialog'
 import CalendarWidget from './CalendarWidget'
 import IdeasWidget from './IdeasWidget'
 import ProjectsWidget from './ProjectsWidget'
+import DocsWidget from './DocsWidget'
+import { ErrorFallback } from './ErrorBoundary'
 import type { ScheduleViewProps, DialogState } from "@/types/schedule"
 import { getTimeStringFromISO } from "@/utils/timeUtils"
 
@@ -27,7 +29,9 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
     selectedTime,
     selectedTimeBlock,
     setSelectedTime,
-    setSelectedDate
+    setSelectedDate,
+    clearError,
+    retryLastFetch
   } = useTaskStore()
 
   // Dialog-related state
@@ -50,8 +54,39 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
     setCreateDialogOpen(true)
   }
 
-  if (isLoading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  // Loading state
+  if (isLoading && tasks.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-muted-foreground">Loading tasks...</div>
+      </div>
+    )
+  }
+
+  // Error state with retry (AC5, AC10)
+  if (error && tasks.length === 0) {
+    return (
+      <div className="flex flex-row gap-4">
+        <div className="flex flex-col gap-4">
+          <CalendarWidget 
+            selected={defaultDate}
+            onSelect={(newDate) => newDate && onDateSelect(newDate)}
+          />
+        </div>
+        <div className="flex-1">
+          <ErrorFallback
+            error={new Error(error)}
+            title="Failed to load tasks"
+            message={error}
+            onReset={() => {
+              clearError();
+              retryLastFetch();
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-row gap-4">
@@ -62,6 +97,7 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
         />
         <IdeasWidget />
         <ProjectsWidget />
+        <DocsWidget />
       </div>
 
       <TimeBlocksPanel 

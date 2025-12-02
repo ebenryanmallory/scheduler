@@ -1,13 +1,14 @@
 import { IdeaType } from "@/types/idea"
+import { fetchWithRetry } from "@/services/retryService"
 
 const API_URL = 'http://localhost:3001/api'
 
 export const ideaService = {
+  /**
+   * Fetch ideas with automatic retry (AC3, AC8)
+   */
   async fetchIdeas(): Promise<IdeaType[]> {
-    const response = await fetch(`${API_URL}/ideas`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch ideas')
-    }
+    const response = await fetchWithRetry(`${API_URL}/ideas`)
     return response.json()
   },
 

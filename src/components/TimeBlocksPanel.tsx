@@ -81,7 +81,7 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
       </h2>
 
       {!isWorkday(selectedDate) ? (
-        <p className="text-gray-500 text-sm">No schedule available for Mondays and Fridays</p>
+        <p className="text-muted-foreground text-sm">No schedule available for Mondays and Fridays</p>
       ) : (
         <div className="space-y-2">
           {timeBlocks.map(({ time: scheduledTime }) => {
@@ -105,9 +105,9 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
                     }
                   }}
                   className={`p-3 border rounded-lg cursor-pointer
-                    ${activity ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'}
-                    ${isSelected ? 'ring-2 ring-blue-400' : ''}
-                    ${isExpandable ? 'border-l-4 border-l-blue-400' : ''}
+                    ${activity ? 'bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900' : 'hover:bg-muted'}
+                    ${isSelected ? 'ring-2 ring-primary' : ''}
+                    ${isExpandable ? 'border-l-4 border-l-primary' : ''}
                   `}
                 >
                   <div className="flex justify-between items-center">
@@ -118,7 +118,7 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
                       )}
                     </span>
                     {isExpandable && (
-                      <span className="text-xs text-blue-600">
+                      <span className="text-xs text-primary">
                         {expandedBlock === scheduledTime ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
@@ -129,11 +129,11 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
                   </div>
                   {activity && (
                     <div className="mt-1">
-                      <p className="text-sm font-medium text-blue-800">
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                         {activity.activity}
                       </p>
                       {activity.duration && (
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-muted-foreground">
                           Duration: {activity.duration} minutes
                         </p>
                       )}

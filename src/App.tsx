@@ -4,12 +4,16 @@ import CreateTaskDialog from './components/modals/CreateTaskDialog'
 import { NotificationSettings } from './components/NotificationSettings'
 import { NotificationBanner } from './components/NotificationBanner'
 import { useNotifications } from './hooks/useNotifications'
+import { ThemeProvider } from './context/ThemeContext'
+import { ThemeToggle } from './components/ThemeToggle'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import packageJson from '../package.json'
 import { TaskType } from './types/task'
 import { Toaster, toast } from 'react-hot-toast';
 import { useTaskStore } from './store/taskStore'
+import { errorService } from './services/errorService'
 
-function App() {
+function AppContent() {
   const { 
     selectedDate,
     isCreateDialogOpen,
@@ -38,21 +42,25 @@ function App() {
       await addTask(task);
       toast.success('Task created successfully');
     } catch (error) {
-      console.error('Failed to create task:', error);
-      toast.error('Failed to create task');
+      // Use errorService for user-friendly messages (AC2 & AC9)
+      const userMessage = errorService.getUserMessage(error);
+      toast.error(userMessage);
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <NotificationBanner />
-      <header className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 py-4 sm:py-8">
+      <header className="w-full bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-950 dark:to-slate-900 py-4 sm:py-8 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-900 to-gray-800 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-900 to-gray-800 dark:from-purple-300 dark:to-gray-200 bg-clip-text text-transparent">
               {greeting}
             </h1>
-            <NotificationSettings />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <NotificationSettings />
+            </div>
           </div>
         </div>
       </header>
@@ -82,13 +90,20 @@ function App() {
         position="bottom-right"
         toastOptions={{
           duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
+          className: 'bg-card text-card-foreground border border-border',
         }}
       />
     </div>
+  )
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="system">
+        <AppContent />
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 

@@ -79,7 +79,7 @@ function IdeasWidget() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold">Ideas</h3>
         </div>
-        <p className="text-sm text-red-500">Error: {error}</p>
+        <p className="text-sm text-destructive">Error: {error}</p>
       </div>
     )
   }

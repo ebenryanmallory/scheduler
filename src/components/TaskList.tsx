@@ -12,17 +12,31 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
-import { TaskType } from "@/types/task"
 import { SortableTask } from "./SortableTasks"
 import { useState, useEffect } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "./ui/button"
 import { TaskListProps, ProjectGroup } from "@/types/taskList"
 import { useProjectStore } from "@/store/projectStore"
+import { useTaskSearch } from "@/hooks/useTaskSearch"
+import { TaskSearchFilter } from "./TaskSearchFilter"
 
 export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete }: TaskListProps) {
   const { getDisplayProjects } = useProjectStore()
   const [expandedProject, setExpandedProject] = useState<string>("")
+
+  // Search and filter functionality
+  const {
+    filteredTasks,
+    filters,
+    setSearch,
+    setStatus,
+    setPriority,
+    setDateRange,
+    clearFilters,
+    hasActiveFilters,
+    searchInputRef,
+  } = useTaskSearch({ tasks })
   
   useEffect(() => {
     // Set first project as expanded by default
@@ -42,15 +56,16 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
   // Get only the first two projects (morning and afternoon)
   const activeProjects = getDisplayProjects().slice(0, 2)
 
+  // Use filtered tasks for display
   const projectGroups: ProjectGroup[] = activeProjects.map(project => ({
     name: project.title,
-    persistentTasks: tasks.filter(task => {
+    persistentTasks: filteredTasks.filter(task => {
       const isPersistent = task.project === project.title && 
         task.persistent &&
         !task.completed;
       return isPersistent;
     }),
-    regularTasks: tasks.filter(task => {
+    regularTasks: filteredTasks.filter(task => {
       const isRegular = task.project === project.title && 
         (!task.persistent || task.completed);
       return isRegular;
@@ -77,13 +92,28 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="space-y-4">
-        {projectGroups
+    <div className="flex-1 min-w-[320px] max-w-md">
+      {/* Search and Filter UI */}
+      <TaskSearchFilter
+        filters={filters}
+        onSearchChange={setSearch}
+        onStatusChange={setStatus}
+        onPriorityChange={setPriority}
+        onDateRangeChange={setDateRange}
+        onClearFilters={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        searchInputRef={searchInputRef}
+        resultCount={filteredTasks.length}
+        totalCount={tasks.length}
+      />
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="space-y-4 mt-4">
+          {projectGroups
           .filter(group => {
             const hasItems = group.persistentTasks.length > 0 || group.regularTasks.length > 0;
             return hasItems;
@@ -146,8 +176,9 @@ export function TaskList({ tasks, onTasksReorder, onTaskUpdate, onEdit, onDelete
               )}
             </div>
           ))}
-      </div>
-    </DndContext>
+        </div>
+      </DndContext>
+    </div>
   )
 }
 

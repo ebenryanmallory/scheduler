@@ -1,13 +1,14 @@
 import { Project } from '@/types/project'
+import { fetchWithRetry } from "@/services/retryService"
 
 const API_URL = 'http://localhost:3001/api'
 
 export const projectService = {
+  /**
+   * Fetch projects with automatic retry (AC3, AC8)
+   */
   async fetchProjects(): Promise<Project[]> {
-    const response = await fetch(`${API_URL}/projects`)
-    if (!response.ok) {
-      throw new Error('Failed to fetch projects')
-    }
+    const response = await fetchWithRetry(`${API_URL}/projects`)
     const data = await response.json()
     if (!Array.isArray(data)) {
       console.error('API returned non-array data:', data)

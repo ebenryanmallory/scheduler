@@ -4,11 +4,37 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/favicon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#e5e7eb" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calendar driven task organizer</title>
+    <!-- FOUC Prevention: Apply theme before React hydrates -->
+    <script>
+      (function() {
+        const THEME_KEY = 'scheduler-theme';
+        const DARK_COLOR = '#0a0a0a';
+        const LIGHT_COLOR = '#ffffff';
+        
+        function getSystemTheme() {
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        
+        try {
+          var stored = localStorage.getItem(THEME_KEY);
+          var theme = stored === 'dark' || stored === 'light' ? stored : 
+                     (stored === 'system' || !stored) ? getSystemTheme() : 'light';
+          
+          document.documentElement.classList.add(theme);
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 
+            theme === 'dark' ? DARK_COLOR : LIGHT_COLOR);
+        } catch (e) {
+          // localStorage unavailable, use system preference
+          var sysTheme = getSystemTheme();
+          document.documentElement.classList.add(sysTheme);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

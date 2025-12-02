@@ -77,19 +77,19 @@ export function NestedTimeBlocks({
     return (
       <div 
         key={currentTime}
-        className="ml-4 p-2 border-l border-blue-200 hover:bg-blue-50"
+        className="ml-4 p-2 border-l border-primary/30 hover:bg-muted"
         data-parent-activity={parentActivity?.tag || ''}
       >
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
             <div>
-              <span className="text-xs text-gray-600">{formatTimeToAMPM(currentTime)}</span>
-              <span className="text-xs text-gray-400 ml-2">
+              <span className="text-xs text-muted-foreground">{formatTimeToAMPM(currentTime)}</span>
+              <span className="text-xs text-muted-foreground/60 ml-2">
                 - {formatTimeToAMPM(addMinutes(currentTime, 30))}
               </span>
             </div>
             {description && (
-              <span className="text-sm text-gray-700 mt-1">{description}</span>
+              <span className="text-sm text-foreground/80 mt-1">{description}</span>
             )}
             {task?.title && (
               <div className="flex items-center gap-2 mt-1">
@@ -100,8 +100,8 @@ export function NestedTimeBlocks({
                   }
                   className="mr-2"
                 />
-                <span className={`text-sm font-medium text-blue-600 ${
-                  task.completed ? 'line-through text-gray-400' : ''
+                <span className={`text-sm font-medium text-primary ${
+                  task.completed ? 'line-through text-muted-foreground' : ''
                 }`}>
                   {task.title}
                 </span>
@@ -121,7 +121,7 @@ export function NestedTimeBlocks({
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="h-7 px-2 text-xs hover:bg-blue-100 hover:text-blue-700"
+                className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
                 onClick={(e) => {
                   e.stopPropagation()
                   const timeBlock = timeBlocks.find(b => b?.time === currentTime)

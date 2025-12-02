@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { TaskType } from '../types/task'
 import { taskService } from './taskService'
+import { errorService } from '@/services/errorService'
 
 interface TaskState {
   tasks: TaskType[]
@@ -21,6 +22,8 @@ interface TaskState {
   setCreateDialogOpen: (isOpen: boolean) => void
   setError: (error: string | null) => void
   setSelectedTime: (time: string | undefined) => void
+  clearError: () => void
+  retryLastFetch: () => Promise<void>
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -40,7 +43,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const tasks = await taskService.fetchTasks(date);
       set({ tasks, isLoading: false });
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      // Use errorService for user-friendly messages (AC2, AC9)
+      set({ error: errorService.getUserMessage(error), isLoading: false });
     }
   },
 
@@ -56,17 +60,16 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       
       const newTask = await taskService.createTask(task, selectedDate);
       
-      // Only update what we need to after successful task creation
       set((currentState) => ({
         tasks: [...currentState.tasks, newTask],
         isLoading: false,
         isCreateDialogOpen: false,
-        // Clear selection state only after successful creation
-        selectedTime: null,
+        selectedTime: undefined,
         selectedDate: null
       }));
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      set({ error: errorService.getUserMessage(error), isLoading: false });
+      throw error; // Re-throw for toast handling
     }
   },
 
@@ -86,7 +89,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         isLoading: false
       }));
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      set({ error: errorService.getUserMessage(error), isLoading: false });
+      throw error;
     }
   },
 
@@ -99,7 +103,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         isLoading: false
       }));
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      set({ error: errorService.getUserMessage(error), isLoading: false });
+      throw error;
     }
   },
 
@@ -109,7 +114,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await taskService.reorderTasks(tasks);
       set({ tasks, isLoading: false });
     } catch (error) {
-      set({ error: (error as Error).message, isLoading: false });
+      set({ error: errorService.getUserMessage(error), isLoading: false });
     }
   },
 
@@ -117,5 +122,14 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   setSelectedTimeBlock: (block) => set({ selectedTimeBlock: block }),
   setCreateDialogOpen: (isOpen) => set({ isCreateDialogOpen: isOpen }),
   setError: (error) => set({ error }),
-  setSelectedTime: (time) => set({ selectedTime: time })
+  setSelectedTime: (time) => set({ selectedTime: time }),
+  clearError: () => set({ error: null }),
+  
+  // AC10: Manual retry option
+  retryLastFetch: async () => {
+    const state = get();
+    if (state.selectedDate) {
+      await get().fetchTasks(state.selectedDate);
+    }
+  }
 })) 
