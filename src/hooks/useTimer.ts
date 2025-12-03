@@ -20,6 +20,8 @@ interface UseTimerReturn {
   isRunning: boolean;
   isPaused: boolean;
   status: TimeTrackingState['status'];
+  /** Current time tracking state (includes startedAt, history, etc.) */
+  timeTracking: TimeTrackingState;
   start: () => void;
   pause: () => void;
   resume: () => void;
@@ -136,7 +138,7 @@ export function useTimer({ taskId, initialState, onStateChange }: UseTimerOption
     } catch (e) {
       console.warn('Failed to restore timer state from localStorage:', e);
     }
-  }, [taskId]);
+  }, [taskId, startTimerInternal]);
   
   /**
    * Notify parent of state changes
@@ -334,6 +336,7 @@ export function useTimer({ taskId, initialState, onStateChange }: UseTimerOption
     isRunning: timeTracking.status === 'in_progress',
     isPaused: timeTracking.status === 'paused',
     status: timeTracking.status,
+    timeTracking,
     start,
     pause,
     resume,

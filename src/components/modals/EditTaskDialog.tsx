@@ -9,6 +9,11 @@ import { EditTaskDialogProps } from '@/types/editTaskDialog'
 import { ProjectName, useProjectStore } from '@/store/projectStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
 import { formatTimeHHMMSS } from '@/hooks/useTimer'
+import { RecurrenceSelector } from '@/components/RecurrenceSelector'
+import { RecurrenceConfig } from '@/types/recurrence'
+import { configToRRuleString, parseRRuleString, isRecurring, isRecurringInstance } from '@/lib/recurrence'
+import { Badge } from '../ui/badge'
+import { Repeat } from 'lucide-react'
 
 export function EditTaskDialog({
   open,
@@ -23,9 +28,19 @@ export function EditTaskDialog({
   const [persistent, setPersistent] = useState(task.persistent || false)
   const [estimatedDuration, setEstimatedDuration] = useState(task.estimatedDuration?.toString() || '')
   const [manualActualDuration, setManualActualDuration] = useState(task.actualDuration?.toString() || '')
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig | null>(() => {
+    if (task.recurrence?.rruleString) {
+      return parseRRuleString(task.recurrence.rruleString)
+    }
+    return null
+  })
   
   const { getDisplayProjects } = useProjectStore()
   const projects = getDisplayProjects();
+  
+  // Check if this is a recurring task instance
+  const isInstance = isRecurringInstance(task.recurrence)
+  const hasRecurrence = isRecurring(task.recurrence)
   
   // Reset state when dialog closes or task changes
   useEffect(() => {
@@ -37,6 +52,7 @@ export function EditTaskDialog({
       setPersistent(task.persistent || false)
       setEstimatedDuration(task.estimatedDuration?.toString() || '')
       setManualActualDuration(task.actualDuration?.toString() || '')
+      setRecurrence(task.recurrence?.rruleString ? parseRRuleString(task.recurrence.rruleString) : null)
     }
   }, [open, task])
 
@@ -54,7 +70,16 @@ export function EditTaskDialog({
       date: task.date,
       estimatedDuration: estimatedDuration ? parseInt(estimatedDuration, 10) : undefined,
       actualDuration: manualActualDuration ? parseInt(manualActualDuration, 10) : task.actualDuration,
-      timeTracking: task.timeTracking
+      timeTracking: task.timeTracking,
+      // Handle recurrence - preserve instance relationship if editing instance
+      recurrence: isInstance 
+        ? task.recurrence // Keep instance relationship
+        : recurrence && recurrence.interval > 0 
+          ? {
+              rruleString: configToRRuleString(recurrence, task.date instanceof Date ? task.date : new Date(task.date)),
+              isInstance: false,
+            }
+          : undefined,
     }
     onTaskUpdate(updatedTask)
     onOpenChange(false)
@@ -64,7 +89,15 @@ export function EditTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Edit Task
+            {hasRecurrence && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Repeat className="h-3 w-3" />
+                {isInstance ? 'Instance' : 'Series'}
+              </Badge>
+            )}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -140,6 +173,31 @@ export function EditTaskDialog({
             </div>
           </div>
           
+          {/* Recurrence selector - only show if not editing an instance */}
+          {!isInstance && (
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Recurrence</Label>
+              <RecurrenceSelector
+                value={recurrence}
+                onChange={setRecurrence}
+                startDate={task.date instanceof Date ? task.date : new Date(task.date)}
+              />
+            </div>
+          )}
+          
+          {/* Show info for instances */}
+          {isInstance && (
+            <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Repeat className="h-4 w-4" />
+                <span>Part of recurring series</span>
+              </div>
+              <p className="mt-1 text-xs">
+                Editing this instance only. To edit the series, edit the original task.
+              </p>
+            </div>
+          )}
+
           {/* Time Tracking History Display */}
           {task.timeTracking && task.timeTracking.history.length > 0 && (
             <div className="text-xs text-muted-foreground space-y-1">

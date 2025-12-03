@@ -1,3 +1,8 @@
+/**
+ * NestedTimeBlocks Component
+ * Renders time slots within a time block with drag-and-drop drop zones
+ */
+
 import { Button } from '@/components/ui/button'
 import { formatTimeToAMPM, addMinutes, getTimeStringFromISO } from '@/utils/timeUtils'
 import { TaskType } from "@/types/task"
@@ -6,6 +11,8 @@ import { useProjectStore } from '@/store/projectStore'
 import { NestedTimeBlocksProps } from '@/types/timeBlock'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTaskStore } from '@/store/taskStore'
+import { TimeBlockDropZone } from './TimeBlockDropZone'
+import { Clock } from 'lucide-react'
 
 export function NestedTimeBlocks({ 
   startTime, 
@@ -54,7 +61,7 @@ export function NestedTimeBlocks({
               <ul>
                 <li><strong>Task:</strong> ${task.title}</li>
                 <li><strong>Project:</strong> ${task.project}</li>
-                <li><strong>Time:</strong> ${formatTimeToAMPM(task.scheduledTime)}</li>
+                <li><strong>Time:</strong> ${task.scheduledTime ? formatTimeToAMPM(task.scheduledTime) : 'Not scheduled'}</li>
                 ${task.description ? `<li><strong>Description:</strong> ${task.description}</li>` : ''}
               </ul>
               <p>Keep up the great work!</p>
@@ -73,71 +80,83 @@ export function NestedTimeBlocks({
 
   const renderTimeBlock = (currentTime: string, description: string, task?: TaskType) => {
     const projectColor = task?.project ? getProjectColor(task.project) : null
+    const hasTask = !!task
     
     return (
-      <div 
+      <TimeBlockDropZone
         key={currentTime}
-        className="ml-4 p-2 border-l border-primary/30 hover:bg-muted"
-        data-parent-activity={parentActivity?.tag || ''}
+        timeBlockId={currentTime}
+        hasExistingTask={hasTask}
       >
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col">
-            <div>
-              <span className="text-xs text-muted-foreground">{formatTimeToAMPM(currentTime)}</span>
-              <span className="text-xs text-muted-foreground/60 ml-2">
-                - {formatTimeToAMPM(addMinutes(currentTime, 30))}
-              </span>
-            </div>
-            {description && (
-              <span className="text-sm text-foreground/80 mt-1">{description}</span>
-            )}
-            {task?.title && (
-              <div className="flex items-center gap-2 mt-1">
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={(checked) => 
-                    handleCompletedChange(task, checked as boolean)
-                  }
-                  className="mr-2"
-                />
-                <span className={`text-sm font-medium text-primary ${
-                  task.completed ? 'line-through text-muted-foreground' : ''
-                }`}>
-                  {task.title}
+        <div 
+          className="ml-4 p-2 border-l border-primary/30 hover:bg-muted transition-colors"
+          data-parent-activity={parentActivity?.tag || ''}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <div>
+                <span className="text-xs text-muted-foreground">{formatTimeToAMPM(currentTime)}</span>
+                <span className="text-xs text-muted-foreground/60 ml-2">
+                  - {formatTimeToAMPM(addMinutes(currentTime, 30))}
                 </span>
-                {task.project && projectColor && (
-                  <Badge 
-                    variant="secondary" 
-                    className={projectColor}
-                  >
-                    {task.project}
-                  </Badge>
-                )}
               </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!task && timeBlocks && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const timeBlock = timeBlocks.find(b => b?.time === currentTime)
-                  if (!timeBlock) {
-                    console.error(`Time block not found for time: ${currentTime}`)
-                    return
-                  }
-                  handleAddTask(currentTime)
-                }}
-              >
-                Add Task
-              </Button>
-            )}
+              {description && (
+                <span className="text-sm text-foreground/80 mt-1">{description}</span>
+              )}
+              {task?.title && (
+                <div className="flex items-center gap-2 mt-1">
+                  <Checkbox
+                    checked={task.completed}
+                    onCheckedChange={(checked) => 
+                      handleCompletedChange(task, checked as boolean)
+                    }
+                    className="mr-2"
+                  />
+                  <span className={`text-sm font-medium text-primary ${
+                    task.completed ? 'line-through text-muted-foreground' : ''
+                  }`}>
+                    {task.title}
+                  </span>
+                  {task.project && projectColor && (
+                    <Badge 
+                      variant="secondary" 
+                      className={projectColor}
+                    >
+                      {task.project}
+                    </Badge>
+                  )}
+                  {task.estimatedDuration && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {task.estimatedDuration}m
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {!task && timeBlocks && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const timeBlock = timeBlocks.find(b => b?.time === currentTime)
+                    if (!timeBlock) {
+                      console.error(`Time block not found for time: ${currentTime}`)
+                      return
+                    }
+                    handleAddTask(currentTime)
+                  }}
+                >
+                  Add Task
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </TimeBlockDropZone>
     )
   }
 
@@ -155,4 +174,4 @@ export function NestedTimeBlocks({
   }
   
   return <div className="space-y-1">{blocks}</div>
-} 
+}

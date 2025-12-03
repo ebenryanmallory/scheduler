@@ -5,10 +5,15 @@ import { useState } from "react"
 import { TaskType } from "@/types/task"
 import { CreateTaskDialogProps, ProjectName } from "@/types/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { formatTimeToAMPM, addMinutes, createScheduledTime, getTimeStringFromISO } from "@/utils/timeUtils"
+import { formatTimeToAMPM, createScheduledTime, getTimeStringFromISO } from "@/utils/timeUtils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useTaskStore } from "@/store/taskStore"
 import { useProjectStore } from "@/store/projectStore"
+import { RecurrenceSelector } from "@/components/RecurrenceSelector"
+import { RecurrenceConfig, TaskTemplate } from "@/types/recurrence"
+import { configToRRuleString } from "@/lib/recurrence"
+import { TemplateLibrary } from "@/components/TemplateLibrary"
+import { FileText } from "lucide-react"
 
 function CreateTaskDialog({ 
   open, 
@@ -22,9 +27,20 @@ function CreateTaskDialog({
   const [project, setProject] = useState<ProjectName | "">("")
   const [persistent, setPersistent] = useState(false)
   const [estimatedDuration, setEstimatedDuration] = useState("")
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig | null>(null)
+  const [templateLibraryOpen, setTemplateLibraryOpen] = useState(false)
 
   // Use store date as fallback
   const effectiveDate = selectedDate || storeDate
+
+  // Apply template values to form
+  const applyTemplate = (template: TaskTemplate) => {
+    if (template.taskDefaults.title) setTitle(template.taskDefaults.title)
+    if (template.taskDefaults.project) setProject(template.taskDefaults.project as ProjectName)
+    if (template.taskDefaults.persistent !== undefined) setPersistent(template.taskDefaults.persistent)
+    if (template.taskDefaults.estimatedDuration) setEstimatedDuration(template.taskDefaults.estimatedDuration.toString())
+    if (template.taskDefaults.recurrence) setRecurrence(template.taskDefaults.recurrence)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,6 +59,7 @@ function CreateTaskDialog({
         id: crypto.randomUUID(),
         title,
         scheduledTime: createScheduledTime(effectiveDate, formattedTime),
+        date: effectiveDate,
         completed: false,
         description: '',
         project: project || undefined,
@@ -52,7 +69,12 @@ function CreateTaskDialog({
           status: 'not_started',
           accumulatedMs: 0,
           history: []
-        }
+        },
+        // Add recurrence if configured
+        recurrence: recurrence && recurrence.interval > 0 ? {
+          rruleString: configToRRuleString(recurrence, effectiveDate),
+          isInstance: false,
+        } : undefined,
       }
       
       await addTask(newTask)
@@ -60,6 +82,7 @@ function CreateTaskDialog({
       setProject("")
       setPersistent(false)
       setEstimatedDuration("")
+      setRecurrence(null)
       onOpenChange(false)
     } catch (error) {
       // Keep this error log for production error handling
@@ -101,7 +124,19 @@ function CreateTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle className="flex items-center justify-between">
+            <span>Create New Task</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setTemplateLibraryOpen(true)}
+              className="ml-2"
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Templates
+            </Button>
+          </DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
@@ -146,6 +181,13 @@ function CreateTaskDialog({
               min={1}
             />
           </div>
+
+          {/* Recurrence selector (AC1, AC2) */}
+          <RecurrenceSelector
+            value={recurrence}
+            onChange={setRecurrence}
+            startDate={effectiveDate ?? undefined}
+          />
           
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -165,6 +207,13 @@ function CreateTaskDialog({
             Create Task
           </Button>
         </form>
+
+        {/* Template Library Dialog */}
+        <TemplateLibrary
+          open={templateLibraryOpen}
+          onOpenChange={setTemplateLibraryOpen}
+          onSelectTemplate={applyTemplate}
+        />
       </DialogContent>
     </Dialog>
   )

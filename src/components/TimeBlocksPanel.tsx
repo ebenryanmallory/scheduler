@@ -1,8 +1,14 @@
+/**
+ * TimeBlocksPanel Component
+ * Renders the schedule with time blocks that support drag-and-drop
+ */
+
 import { useState } from 'react'
 import { ScheduleActivity, ScheduleActivities } from '../types/schedule'
 import { scheduleActivities } from '../data/scheduleActivities'
 import { TimeBlockDetails } from './TimeBlockDetails'
 import { NestedTimeBlocks } from './NestedTimeBlocks'
+import { TimeBlockDropZone } from './TimeBlockDropZone'
 import { ChevronDown, ChevronRight } from "lucide-react"
 import { 
   formatTimeToAMPM, 
@@ -67,6 +73,11 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
     return activity || null
   }
 
+  // Get task scheduled for a specific time
+  const getTaskForTime = (scheduledTime: string): TaskType | undefined => {
+    return tasks.find(t => t.scheduledTime === scheduledTime)
+  }
+
   if (!selectedDate) return null
 
   return (
@@ -87,6 +98,7 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
           {timeBlocks.map(({ time: scheduledTime }) => {
             const activity = getActivityForBlock(scheduledTime)
             const isSelected = selectedBlock === scheduledTime
+            const task = getTaskForTime(scheduledTime)
             
             // Skip blocks that are within a longer duration block
             if (isWithinDurationBlock(scheduledTime)) {
@@ -94,71 +106,88 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
             }
 
             const isExpandable = activity?.duration && activity.duration > 30
+            const hasTask = !!task
 
             return (
-              <div key={scheduledTime}>
-                <div 
-                  onClick={() => {
-                    setSelectedBlock(isSelected ? null : scheduledTime)
-                    if (isExpandable) {
-                      setExpandedBlock(expandedBlock === scheduledTime ? null : scheduledTime)
-                    }
-                  }}
-                  className={`p-3 border rounded-lg cursor-pointer
-                    ${activity ? 'bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900' : 'hover:bg-muted'}
-                    ${isSelected ? 'ring-2 ring-primary' : ''}
-                    ${isExpandable ? 'border-l-4 border-l-primary' : ''}
-                  `}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm">
-                      {formatTimeToAMPM(scheduledTime)}
-                      {activity?.duration && activity.duration > 30 && (
-                        ` - ${formatTimeToAMPM(addMinutes(scheduledTime, activity.duration))}`
-                      )}
-                    </span>
-                    {isExpandable && (
-                      <span className="text-xs text-primary">
-                        {expandedBlock === scheduledTime ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
+              <TimeBlockDropZone
+                key={scheduledTime}
+                timeBlockId={scheduledTime}
+                hasExistingTask={hasTask}
+                disabled={!!isExpandable} // Disable drop on expandable blocks - users should drop in nested slots
+              >
+                <div>
+                  <div 
+                    onClick={() => {
+                      setSelectedBlock(isSelected ? null : scheduledTime)
+                      if (isExpandable) {
+                        setExpandedBlock(expandedBlock === scheduledTime ? null : scheduledTime)
+                      }
+                    }}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors
+                      ${activity ? 'bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900' : 'hover:bg-muted'}
+                      ${isSelected ? 'ring-2 ring-primary' : ''}
+                      ${isExpandable ? 'border-l-4 border-l-primary' : ''}
+                    `}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-sm">
+                        {formatTimeToAMPM(scheduledTime)}
+                        {activity?.duration && activity.duration > 30 && (
+                          ` - ${formatTimeToAMPM(addMinutes(scheduledTime, activity.duration))}`
                         )}
                       </span>
-                    )}
-                  </div>
-                  {activity && (
-                    <div className="mt-1">
-                      <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-                        {activity.activity}
-                      </p>
-                      {activity.duration && (
-                        <p className="text-xs text-muted-foreground">
-                          Duration: {activity.duration} minutes
-                        </p>
+                      {isExpandable && (
+                        <span className="text-xs text-primary">
+                          {expandedBlock === scheduledTime ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </span>
                       )}
                     </div>
+                    {activity && (
+                      <div className="mt-1">
+                        <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                          {activity.activity}
+                        </p>
+                        {activity.duration && (
+                          <p className="text-xs text-muted-foreground">
+                            Duration: {activity.duration} minutes
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Show scheduled task (for non-expandable blocks) */}
+                    {!isExpandable && task && (
+                      <div className="mt-2 p-2 bg-background/50 rounded border border-border">
+                        <span className={`text-sm font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                          {task.title}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {expandedBlock === scheduledTime && isExpandable && activity && (
+                    <NestedTimeBlocks
+                      startTime={scheduledTime}
+                      duration={activity.duration || 0}
+                      onAddTask={onAddTask}
+                      timeBlocks={timeBlocks}
+                      tasks={tasks}
+                      parentActivity={activity}
+                    />
+                  )}
+
+                  {isSelected && activity && (
+                    <TimeBlockDetails
+                      time={scheduledTime}
+                      activity={activity}
+                    />
                   )}
                 </div>
-
-                {expandedBlock === scheduledTime && isExpandable && activity && (
-                  <NestedTimeBlocks
-                    startTime={scheduledTime}
-                    duration={activity.duration || 0}
-                    onAddTask={onAddTask}
-                    timeBlocks={timeBlocks}
-                    tasks={tasks}
-                    parentActivity={activity}
-                  />
-                )}
-
-                {isSelected && activity && (
-                  <TimeBlockDetails
-                    time={scheduledTime}
-                    activity={activity}
-                  />
-                )}
-              </div>
+              </TimeBlockDropZone>
             )
           })}
         </div>

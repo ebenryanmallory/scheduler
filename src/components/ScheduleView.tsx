@@ -9,6 +9,7 @@ import IdeasWidget from './IdeasWidget'
 import ProjectsWidget from './ProjectsWidget'
 import DocsWidget from './DocsWidget'
 import { ErrorFallback } from './ErrorBoundary'
+import { DragDropScheduleProvider } from './DragDropScheduleProvider'
 import type { ScheduleViewProps, DialogState } from "@/types/schedule"
 import { getTimeStringFromISO } from "@/utils/timeUtils"
 
@@ -24,10 +25,8 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
     addTask,
     updateTask,
     deleteTask,
-    reorderTasks,
     setCreateDialogOpen,
     selectedTime,
-    selectedTimeBlock,
     setSelectedTime,
     setSelectedDate,
     clearError,
@@ -89,49 +88,50 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
   }
 
   return (
-    <div className="flex flex-row gap-4">
-      <div className="flex flex-col gap-4">
-        <CalendarWidget 
-          selected={defaultDate}
-          onSelect={(newDate) => newDate && onDateSelect(newDate)}
+    <DragDropScheduleProvider tasks={tasks}>
+      <div className="flex flex-row gap-4">
+        <div className="flex flex-col gap-4">
+          <CalendarWidget 
+            selected={defaultDate}
+            onSelect={(newDate) => newDate && onDateSelect(newDate)}
+          />
+          <IdeasWidget />
+          <ProjectsWidget />
+          <DocsWidget />
+        </div>
+
+        <TimeBlocksPanel 
+          selectedDate={defaultDate}
+          onAddTask={handleAddTask}
+          tasks={tasks}
         />
-        <IdeasWidget />
-        <ProjectsWidget />
-        <DocsWidget />
-      </div>
 
-      <TimeBlocksPanel 
-        selectedDate={defaultDate}
-        onAddTask={handleAddTask}
-        tasks={tasks}
-      />
-
-      <TaskList
-        tasks={tasks}
-        onTasksReorder={reorderTasks}
-        onTaskUpdate={(task) => updateTask(task.id, task)}
-        onEdit={(task) => setDialogState(prev => ({ ...prev, taskToEdit: task, isEditOpen: true }))}
-        onDelete={deleteTask}
-      />
-
-      <CreateTaskDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        selectedDate={defaultDate}
-        selectedTime={selectedTime || ''}
-        onTaskCreate={addTask}
-      />
-
-      {taskToEdit && (
-        <EditTaskDialog
-          open={isEditOpen}
-          onOpenChange={(open) => setDialogState(prev => ({ ...prev, isEditOpen: open }))}
-          task={taskToEdit}
+        <TaskList
+          tasks={tasks}
           onTaskUpdate={(task) => updateTask(task.id, task)}
+          onEdit={(task) => setDialogState(prev => ({ ...prev, taskToEdit: task, isEditOpen: true }))}
+          onDelete={deleteTask}
         />
-      )}
-    </div>
+
+        <CreateTaskDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setCreateDialogOpen}
+          selectedDate={defaultDate}
+          selectedTime={selectedTime || ''}
+          onTaskCreate={addTask}
+        />
+
+        {taskToEdit && (
+          <EditTaskDialog
+            open={isEditOpen}
+            onOpenChange={(open) => setDialogState(prev => ({ ...prev, isEditOpen: open }))}
+            task={taskToEdit}
+            onTaskUpdate={(task) => updateTask(task.id, task)}
+          />
+        )}
+      </div>
+    </DragDropScheduleProvider>
   )
 }
 
-export default ScheduleView 
+export default ScheduleView

@@ -2,10 +2,12 @@ import { TaskType, TimeTrackingState } from "@/types/task"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Checkbox } from "./ui/checkbox"
-import { Pencil, Trash2, Timer } from "lucide-react"
+import { Pencil, Trash2, Timer, Repeat } from "lucide-react"
 import { useProjectStore } from '@/store/projectStore'
 import { TaskTimer } from './TaskTimer'
 import { useState } from 'react'
+import { isRecurring, isRecurringInstance, describeRecurrence } from '@/lib/recurrence'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 interface TaskProps extends TaskType {
   onTaskUpdate?: (task: TaskType) => void
@@ -28,6 +30,7 @@ export function Task({
   estimatedDuration,
   actualDuration,
   timeTracking,
+  recurrence,
   onTaskUpdate,
   onEdit,
   onDelete,
@@ -35,6 +38,13 @@ export function Task({
 }: TaskProps) {
   const { getProjectColor } = useProjectStore()
   const [timerExpanded, setTimerExpanded] = useState(false)
+  
+  // Check if task is recurring (AC11)
+  const hasRecurrence = isRecurring(recurrence)
+  const isInstance = isRecurringInstance(recurrence)
+  const recurrenceDescription = recurrence?.rruleString 
+    ? describeRecurrence(recurrence.rruleString)
+    : ''
 
   // Build the full task object for updates
   const getFullTask = (): TaskType => ({
@@ -50,7 +60,8 @@ export function Task({
     time,
     estimatedDuration,
     actualDuration,
-    timeTracking
+    timeTracking,
+    recurrence
   })
 
   // Handle time tracking updates
@@ -78,6 +89,24 @@ export function Task({
           <span className={`font-medium text-sm truncate ${completed ? 'line-through text-muted-foreground' : ''}`}>
             {title}
           </span>
+          {/* Recurring indicator (AC11) */}
+          {hasRecurrence && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={`flex-shrink-0 ${isInstance ? 'text-muted-foreground' : 'text-primary'}`}>
+                    <Repeat className="h-3.5 w-3.5" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">
+                    {isInstance ? 'Part of series: ' : ''}
+                    {recurrenceDescription || 'Recurring task'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <div className="flex items-center gap-1">
           {/* Timer Toggle Button */}

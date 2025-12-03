@@ -1,4 +1,5 @@
 import { ProjectName } from "@/store/projectStore"
+import { RecurrenceRule } from "./recurrence"
 
 export type TaskStatus = 'pending' | 'completed' | 'archived';
 export type TaskPriority = 'high' | 'medium' | 'low';
@@ -41,6 +42,8 @@ export interface TaskType {
   actualDuration?: number;
   /** Time tracking state */
   timeTracking?: TimeTrackingState;
+  /** Recurrence rule for recurring tasks */
+  recurrence?: RecurrenceRule;
 }
 
 // Filter types for task search

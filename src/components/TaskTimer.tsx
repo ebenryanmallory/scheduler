@@ -39,6 +39,7 @@ export function TaskTimer({ task, onTimeUpdate, compact = false }: TaskTimerProp
     isRunning,
     isPaused,
     status,
+    timeTracking: currentTimeTracking,
     start,
     pause,
     resume,
@@ -66,12 +67,12 @@ export function TaskTimer({ task, onTimeUpdate, compact = false }: TaskTimerProp
       const now = Date.now();
       if (now - lastSaveRef.current >= AUTO_SAVE_INTERVAL_MS) {
         lastSaveRef.current = now;
-        // Trigger state update which will call onTimeUpdate
+        // Use hook's current state (not stale prop) to ensure correct startedAt after pause/resume
         const currentState: TimeTrackingState = {
           status: 'in_progress',
-          startedAt: task.timeTracking?.startedAt,
+          startedAt: currentTimeTracking.startedAt,
           accumulatedMs: elapsedMs,
-          history: task.timeTracking?.history || []
+          history: currentTimeTracking.history
         };
         const actualDuration = msToMinutes(elapsedMs);
         onTimeUpdate?.(currentState, actualDuration);
@@ -79,7 +80,7 @@ export function TaskTimer({ task, onTimeUpdate, compact = false }: TaskTimerProp
     }, AUTO_SAVE_INTERVAL_MS);
     
     return () => clearInterval(saveInterval);
-  }, [isRunning, elapsedMs, task.timeTracking, onTimeUpdate]);
+  }, [isRunning, elapsedMs, currentTimeTracking, onTimeUpdate]);
   
   const handleStart = useCallback(() => {
     // Check if we can start (no other timer running)
