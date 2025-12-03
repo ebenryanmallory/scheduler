@@ -65,5 +65,15 @@ Once all stories in an Epic (e.g., Epic 1) are complete:
 | **Product Owner** | `@po` | Clarify requirements |
 
 ## Current Status
-*   **Current Epic**: Epic 1 (Foundation & Quick Wins)
-*   **Next Story**: `docs/stories/story-1.1-smart-notifications.md`
+*   **Completed Epic**: Epic 1 (Foundation & Quick Wins) ✅
+    *   Story 1.1: Smart Notifications - PASS (85)
+    *   Story 1.2: Task Search & Filter - PASS (82)
+    *   Story 1.3: Dark Mode - PASS (95)
+    *   Story 1.4: Error Handling - PASS (92)
+*   **Current Epic**: Epic 2 (Core Productivity Features)
+    *   Story 2.1: Time Tracking Foundation - PASS (85) ✅
+    *   Story 2.2: Time Tracking Analytics Widget - PASS (85) ✅
+    *   Story 2.3: Drag and Drop Scheduling - Ready for Dev
+    *   Story 2.4: Recurring Tasks and Templates - Ready for Dev
+    *   Story 2.5: Quick Stats Widget - PASS (85) ✅
+*   **Next Story**: `docs/stories/2.3.drag-and-drop-scheduling.md`

@@ -7,6 +7,8 @@ import { useNotifications } from './hooks/useNotifications'
 import { ThemeProvider } from './context/ThemeContext'
 import { ThemeToggle } from './components/ThemeToggle'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import TimeAnalyticsWidget from './components/TimeAnalyticsWidget'
+import QuickStatsWidget from './components/QuickStatsWidget'
 import packageJson from '../package.json'
 import { TaskType } from './types/task'
 import { Toaster, toast } from 'react-hot-toast';
@@ -66,7 +68,13 @@ function AppContent() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-8 py-4 sm:py-8">
-        <div className="mx-auto max-w-7xl px-8 py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8 py-4 sm:py-8">
+          {/* Analytics Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <QuickStatsWidget />
+            <TimeAnalyticsWidget />
+          </div>
+          
           <div>
             <ScheduleView 
               selectedDate={selectedDate}
