@@ -21,6 +21,7 @@ function CreateTaskDialog({
   const [title, setTitle] = useState("")
   const [project, setProject] = useState<ProjectName | "">("")
   const [persistent, setPersistent] = useState(false)
+  const [estimatedDuration, setEstimatedDuration] = useState("")
 
   // Use store date as fallback
   const effectiveDate = selectedDate || storeDate
@@ -45,13 +46,20 @@ function CreateTaskDialog({
         completed: false,
         description: '',
         project: project || undefined,
-        persistent
+        persistent,
+        estimatedDuration: estimatedDuration ? parseInt(estimatedDuration, 10) : undefined,
+        timeTracking: {
+          status: 'not_started',
+          accumulatedMs: 0,
+          history: []
+        }
       }
       
       await addTask(newTask)
       setTitle("")
       setProject("")
       setPersistent(false)
+      setEstimatedDuration("")
       onOpenChange(false)
     } catch (error) {
       // Keep this error log for production error handling
@@ -128,6 +136,16 @@ function CreateTaskDialog({
               ))}
             </SelectContent>
           </Select>
+          
+          <div>
+            <Input
+              type="number"
+              placeholder="Estimated duration (minutes)"
+              value={estimatedDuration}
+              onChange={(e) => setEstimatedDuration(e.target.value)}
+              min={1}
+            />
+          </div>
           
           <div className="flex items-center space-x-2">
             <Checkbox 

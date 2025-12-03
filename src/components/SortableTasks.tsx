@@ -8,9 +8,10 @@ interface SortableTaskProps extends TaskType {
   onTaskUpdate?: (task: TaskType) => void
   onEdit?: (task: TaskType) => void
   onDelete?: (id: string) => void
+  showTimer?: boolean
 }
 
-export function SortableTask(props: SortableTaskProps) {
+export function SortableTask({ showTimer = true, ...props }: SortableTaskProps) {
   const {
     attributes,
     listeners,
@@ -34,6 +35,7 @@ export function SortableTask(props: SortableTaskProps) {
           onEdit={props.onEdit} 
           onTaskUpdate={props.onTaskUpdate}
           onDelete={props.onDelete}
+          showTimer={showTimer}
         />
       </div>
     </div>
