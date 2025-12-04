@@ -192,15 +192,28 @@ function CreateTaskDialog({
           {/* Recurrence selector (AC1, AC2) */}
           <RecurrenceSelector
             value={recurrence}
-            onChange={setRecurrence}
+            onChange={(newRecurrence) => {
+              setRecurrence(newRecurrence)
+              // If recurrence is set, uncheck persistent
+              if (newRecurrence && newRecurrence.interval > 0) {
+                setPersistent(false)
+              }
+            }}
             startDate={effectiveDate ?? undefined}
+            disabled={persistent}
           />
           
           <div className="flex items-center space-x-2 min-h-[44px] sm:min-h-0">
             <Checkbox 
               id="persistent"
               checked={persistent}
-              onCheckedChange={(checked) => setPersistent(checked as boolean)}
+              onCheckedChange={(checked) => {
+                setPersistent(checked as boolean)
+                // If persistent is checked, clear recurrence
+                if (checked) {
+                  setRecurrence(null)
+                }
+              }}
               className="h-5 w-5 sm:h-4 sm:w-4"
             />
             <label 

@@ -18,9 +18,10 @@ function QuickStatsWidget() {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       const stored = localStorage.getItem(COLLAPSE_STORAGE_KEY);
-      return stored === 'true';
+      // Default to collapsed (true) if no stored value exists
+      return stored === null ? true : stored === 'true';
     } catch {
-      return false;
+      return true;
     }
   });
 

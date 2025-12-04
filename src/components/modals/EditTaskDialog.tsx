@@ -188,8 +188,15 @@ export function EditTaskDialog({
               <Label className="text-xs text-muted-foreground">Recurrence</Label>
               <RecurrenceSelector
                 value={recurrence}
-                onChange={setRecurrence}
+                onChange={(newRecurrence) => {
+                  setRecurrence(newRecurrence)
+                  // If recurrence is set, uncheck persistent
+                  if (newRecurrence && newRecurrence.interval > 0) {
+                    setPersistent(false)
+                  }
+                }}
                 startDate={task.date instanceof Date ? task.date : new Date(task.date)}
+                disabled={persistent}
               />
             </div>
           )}
@@ -230,7 +237,13 @@ export function EditTaskDialog({
             <Checkbox 
               id="persistent-edit"
               checked={persistent}
-              onCheckedChange={(checked: boolean) => setPersistent(checked)}
+              onCheckedChange={(checked: boolean) => {
+                setPersistent(checked)
+                // If persistent is checked, clear recurrence
+                if (checked && !isInstance) {
+                  setRecurrence(null)
+                }
+              }}
               className="h-5 w-5 sm:h-4 sm:w-4"
             />
             <label 
