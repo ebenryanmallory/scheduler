@@ -65,7 +65,7 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center justify-between p-2 rounded-md ${color} hover:bg-opacity-90 transition-all relative`}
+      className={`group flex items-center justify-between p-2 rounded-md ${color} hover:bg-opacity-90 transition-all relative text-gray-700`}
     >
       {isEditing ? (
         <Input
@@ -73,29 +73,29 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
           onChange={(e) => setEditedTitle(e.target.value)}
           onBlur={handleSave}
           onKeyDown={handleKeyDown}
-          className="flex-1 mr-2"
+          className="flex-1 mr-2 text-gray-900"
           autoFocus
         />
       ) : (
-        <span className="text-sm font-medium">{title}</span>
+        <span className="text-sm font-medium text-gray-700">{title}</span>
       )}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 text-gray-600">
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleEdit}
-            className="p-1 hover:bg-gray-200 rounded-md transition-colors"
+            className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
           >
             <Pencil className="h-4 w-4" />
           </button>
           <button
             onClick={() => setShowColorPicker(!showColorPicker)}
-            className="p-1 hover:bg-gray-200 rounded-md transition-colors"
+            className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
           >
             <Palette className="h-4 w-4" />
           </button>
           <button
             onClick={() => deleteProject(id)}
-            className="p-1 hover:bg-gray-200 rounded-md transition-colors"
+            className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -110,7 +110,7 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
       </div>
 
       {showColorPicker && (
-        <div className="absolute right-0 top-full mt-1 p-2 bg-white rounded-md shadow-lg border z-10">
+        <div className="absolute right-0 top-full mt-1 p-2 bg-white rounded-md shadow-lg border border-gray-200 z-10">
           <div className="flex gap-2">
             {COLOR_OPTIONS.map((colorOption) => {
               const colorClass = `${colorOption.bg} ${colorOption.text}`
@@ -121,8 +121,8 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
                   onClick={() => handleColorSelect(colorClass)}
                   className={`w-8 h-8 rounded-md border-2 transition-all ${
                     color === colorClass
-                      ? 'border-gray-900 scale-105'
-                      : 'border-transparent hover:border-gray-300'
+                      ? 'border-gray-800 scale-105'
+                      : 'border-transparent hover:border-gray-400'
                   } ${colorOption.bg}`}
                   title={colorOption.label}
                 />

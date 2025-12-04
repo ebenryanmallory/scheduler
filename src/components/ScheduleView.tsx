@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useTaskStore } from '../store/taskStore'
 import TimeBlocksPanel from './TimeBlocksPanel'
 import { TaskList } from "./TaskList"
@@ -11,6 +11,7 @@ import DocsWidget from './DocsWidget'
 import { ErrorFallback } from './ErrorBoundary'
 import { DragDropScheduleProvider } from './DragDropScheduleProvider'
 import type { ScheduleViewProps, DialogState } from "@/types/schedule"
+import type { TaskType } from "@/types/task"
 import { getTimeStringFromISO } from "@/utils/timeUtils"
 
 function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: ScheduleViewProps) {
@@ -52,6 +53,15 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
     setSelectedDate(defaultDate)
     setCreateDialogOpen(true)
   }
+
+  // Memoize callbacks to prevent infinite re-render loops
+  const handleTaskUpdate = useCallback((task: TaskType) => {
+    updateTask(task.id, task)
+  }, [updateTask])
+
+  const handleTaskEdit = useCallback((task: TaskType) => {
+    setDialogState(prev => ({ ...prev, taskToEdit: task, isEditOpen: true }))
+  }, [])
 
   // Loading state
   if (isLoading && tasks.length === 0) {
@@ -108,8 +118,8 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
 
         <TaskList
           tasks={tasks}
-          onTaskUpdate={(task) => updateTask(task.id, task)}
-          onEdit={(task) => setDialogState(prev => ({ ...prev, taskToEdit: task, isEditOpen: true }))}
+          onTaskUpdate={handleTaskUpdate}
+          onEdit={handleTaskEdit}
           onDelete={deleteTask}
         />
 
@@ -126,7 +136,7 @@ function ScheduleView({ selectedDate, onDateSelect, onTimeBlockSelect }: Schedul
             open={isEditOpen}
             onOpenChange={(open) => setDialogState(prev => ({ ...prev, isEditOpen: open }))}
             task={taskToEdit}
-            onTaskUpdate={(task) => updateTask(task.id, task)}
+            onTaskUpdate={handleTaskUpdate}
           />
         )}
       </div>

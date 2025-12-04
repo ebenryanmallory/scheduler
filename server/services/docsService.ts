@@ -263,10 +263,14 @@ export class DocsService {
       const entries = await readdir(completedPath, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isFile() && entry.name.endsWith('.md')) {
-          // Extract story ID from filename like "story-1.1-smart-notifications.md"
-          const match = entry.name.match(/story-(\d+\.\d+)/);
-          if (match) {
-            completed.add(match[1]);
+          // Extract story ID from filename patterns:
+          // - "story-1.1-smart-notifications.md" (story-X.Y-*)
+          // - "2.1.time-tracking-foundation.md" (X.Y.*)
+          const storyPrefixMatch = entry.name.match(/story-(\d+\.\d+)/);
+          const dotPrefixMatch = entry.name.match(/^(\d+\.\d+)\./);
+          const storyId = storyPrefixMatch?.[1] || dotPrefixMatch?.[1];
+          if (storyId) {
+            completed.add(storyId);
           }
         }
       }
@@ -285,9 +289,14 @@ export class DocsService {
       const entries = await readdir(storiesPath, { withFileTypes: true });
       for (const entry of entries) {
         if (entry.isFile() && entry.name.endsWith('.md')) {
-          const match = entry.name.match(/story-(\d+\.\d+)/);
-          if (match) {
-            pending.add(match[1]);
+          // Extract story ID from filename patterns:
+          // - "story-3.1-mobile-layouts.md" (story-X.Y-*)
+          // - "3.1.mobile-optimized-layouts.md" (X.Y.*)
+          const storyPrefixMatch = entry.name.match(/story-(\d+\.\d+)/);
+          const dotPrefixMatch = entry.name.match(/^(\d+\.\d+)\./);
+          const storyId = storyPrefixMatch?.[1] || dotPrefixMatch?.[1];
+          if (storyId) {
+            pending.add(storyId);
           }
         }
       }
@@ -338,19 +347,32 @@ export class DocsService {
     try {
       const entries = await readdir(storiesPath, { withFileTypes: true });
       for (const entry of entries) {
-        if (entry.isFile() && entry.name.includes(`story-${storyId}`)) {
+        if (!entry.isFile() || !entry.name.endsWith('.md')) continue;
+        
+        // Check if file matches story ID with either naming pattern:
+        // - "story-3.1-mobile-layouts.md" (story-X.Y-*)
+        // - "3.1.mobile-optimized-layouts.md" (X.Y.*)
+        const hasStoryPrefix = entry.name.includes(`story-${storyId}`);
+        const hasDotPrefix = entry.name.startsWith(`${storyId}.`);
+        
+        if (hasStoryPrefix || hasDotPrefix) {
           const content = await readFile(path.join(storiesPath, entry.name), 'utf-8');
           
-          // Check for status indicators in the file
-          const statusMatch = content.match(/\*\*Status\*\*:\s*(.+)/i);
+          // Check for status indicators in the file - support multiple patterns:
+          // - "**Status**: Ready for Dev" (in markdown)
+          // - "## Status\n**Ready for Dev**" (heading style)
+          const statusMatch = content.match(/\*\*Status\*\*:\s*(.+)/i) || 
+                             content.match(/##\s*Status\s*\n+\*\*(.+?)\*\*/i);
           if (statusMatch) {
             const status = statusMatch[1].toLowerCase().trim();
-            if (status.includes('development') || status.includes('progress')) {
+            if (status.includes('development') || status.includes('progress') || status.includes('in dev')) {
               return 'in-progress';
             } else if (status.includes('complete') || status.includes('done')) {
               return 'completed';
             } else if (status.includes('block') || status.includes('hold')) {
               return 'blocked';
+            } else if (status.includes('ready')) {
+              return 'pending';
             }
           }
           return 'pending';

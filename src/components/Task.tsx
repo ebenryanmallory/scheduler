@@ -5,7 +5,7 @@ import { Checkbox } from "./ui/checkbox"
 import { Pencil, Trash2, Timer, Repeat } from "lucide-react"
 import { useProjectStore } from '@/store/projectStore'
 import { TaskTimer } from './TaskTimer'
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { isRecurring, isRecurringInstance, describeRecurrence } from '@/lib/recurrence'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
@@ -46,8 +46,8 @@ export function Task({
     ? describeRecurrence(recurrence.rruleString)
     : ''
 
-  // Build the full task object for updates
-  const getFullTask = (): TaskType => ({
+  // Build the full task object for updates - memoized to prevent infinite loops
+  const fullTask = useMemo((): TaskType => ({
     id,
     title,
     description,
@@ -62,16 +62,16 @@ export function Task({
     actualDuration,
     timeTracking,
     recurrence
-  })
+  }), [id, title, description, project, date, completed, scheduledTime, persistent, timeBlock, time, estimatedDuration, actualDuration, timeTracking, recurrence])
 
-  // Handle time tracking updates
-  const handleTimeUpdate = (newTimeTracking: TimeTrackingState, newActualDuration: number) => {
+  // Handle time tracking updates - stable callback to prevent infinite loops
+  const handleTimeUpdate = useCallback((newTimeTracking: TimeTrackingState, newActualDuration: number) => {
     onTaskUpdate?.({
-      ...getFullTask(),
+      ...fullTask,
       timeTracking: newTimeTracking,
       actualDuration: newActualDuration
     })
-  }
+  }, [fullTask, onTaskUpdate])
 
   return (
     <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ export function Task({
             checked={completed}
             onCheckedChange={(checked) => 
               onTaskUpdate?.({ 
-                ...getFullTask(),
+                ...fullTask,
                 completed: checked as boolean
               })
             }
@@ -125,7 +125,7 @@ export function Task({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => onEdit?.(getFullTask())}
+            onClick={() => onEdit?.(fullTask)}
           >
             <Pencil className="h-4 w-4 text-muted-foreground hover:text-primary" />
           </Button>
@@ -154,7 +154,7 @@ export function Task({
       {showTimer && timerExpanded && (
         <div className="ml-8 mt-2">
           <TaskTimer
-            task={getFullTask()}
+            task={fullTask}
             onTimeUpdate={handleTimeUpdate}
           />
         </div>

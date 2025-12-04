@@ -107,26 +107,12 @@ export function TaskList({ tasks, onTaskUpdate, onEdit, onDelete }: TaskListProp
 
   return (
     <TaskListDropZone>
-      {/* Search and Filter UI */}
-      <TaskSearchFilter
-        filters={filters}
-        onSearchChange={setSearch}
-        onStatusChange={setStatus}
-        onPriorityChange={setPriority}
-        onDateRangeChange={setDateRange}
-        onClearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        searchInputRef={searchInputRef}
-        resultCount={filteredTasks.length}
-        totalCount={tasks.length}
-      />
-
       {/* SortableContext for reordering - uses parent DndContext */}
       <SortableContext
         items={allTaskIds}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4">
           {projectGroups
             .filter(group => {
               const hasItems = group.persistentTasks.length > 0 || group.regularTasks.length > 0;
@@ -204,6 +190,22 @@ export function TaskList({ tasks, onTaskUpdate, onEdit, onDelete }: TaskListProp
           )}
         </div>
       )}
+
+      {/* Search and Filter UI */}
+      <div className="mt-8 pt-6 border-t border-border">
+        <TaskSearchFilter
+          filters={filters}
+          onSearchChange={setSearch}
+          onStatusChange={setStatus}
+          onPriorityChange={setPriority}
+          onDateRangeChange={setDateRange}
+          onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+          searchInputRef={searchInputRef}
+          resultCount={filteredTasks.length}
+          totalCount={tasks.length}
+        />
+      </div>
     </TaskListDropZone>
   )
 }

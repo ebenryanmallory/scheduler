@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { BookOpen, Sparkles } from "lucide-react"
+import { BookOpen } from "lucide-react"
 import { Button } from "./ui/button"
 import DocsDialog from "./modals/DocsDialog"
 import ProjectProgress, { ProjectProgressData } from "./ProjectProgress"
@@ -29,12 +29,9 @@ function DocsWidget() {
   return (
     <div className="w-full bg-card border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-amber-500" />
-          Project Progress
-        </h3>
+        <h3 className="font-semibold">Project Progress</h3>
         {progressData && (
-          <span className="text-sm font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {progressData.overallPercent}%
           </span>
         )}
@@ -48,10 +45,10 @@ function DocsWidget() {
       <Button 
         variant="outline" 
         onClick={() => setIsDocsOpen(true)}
-        className="w-full bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200 text-amber-800 hover:from-amber-100 hover:to-orange-100 hover:border-amber-300"
+        className="w-full"
       >
         <BookOpen className="h-4 w-4 mr-2" />
-        View Specs & Details
+        View Details
       </Button>
 
       <DocsDialog 

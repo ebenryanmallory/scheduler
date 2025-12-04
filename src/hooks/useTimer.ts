@@ -98,56 +98,6 @@ export function useTimer({ taskId, initialState, onStateChange }: UseTimerOption
   }, []);
   
   /**
-   * Restore timer state from localStorage on mount
-   */
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(TIMER_STORAGE_KEY);
-      if (!stored) return;
-      
-      const storageState: TimerStorageState = JSON.parse(stored);
-      
-      // Only restore if it's for this task
-      if (storageState.taskId !== taskId) return;
-      
-      const { timeTracking: storedTracking, savedAt } = storageState;
-      
-      // If timer was running when saved, calculate elapsed time since save
-      if (storedTracking.status === 'in_progress' && storedTracking.startedAt) {
-        const savedAtTime = new Date(savedAt).getTime();
-        const now = Date.now();
-        const timeSinceSave = now - savedAtTime;
-        
-        // Add time since save to accumulated time
-        const updatedTracking: TimeTrackingState = {
-          ...storedTracking,
-          accumulatedMs: storedTracking.accumulatedMs + timeSinceSave,
-          startedAt: new Date().toISOString() // Reset start time to now
-        };
-        
-        setTimeTracking(updatedTracking);
-        setElapsedMs(updatedTracking.accumulatedMs);
-        
-        // Auto-resume the timer
-        startTimerInternal(updatedTracking.accumulatedMs);
-      } else {
-        // Just restore the state without resuming
-        setTimeTracking(storedTracking);
-        setElapsedMs(storedTracking.accumulatedMs);
-      }
-    } catch (e) {
-      console.warn('Failed to restore timer state from localStorage:', e);
-    }
-  }, [taskId, startTimerInternal]);
-  
-  /**
-   * Notify parent of state changes
-   */
-  useEffect(() => {
-    onStateChange?.(timeTracking);
-  }, [timeTracking, onStateChange]);
-  
-  /**
    * Initialize Web Worker
    */
   useEffect(() => {
@@ -217,6 +167,56 @@ export function useTimer({ taskId, initialState, onStateChange }: UseTimerOption
       fallbackIntervalRef.current = null;
     }
   }, []);
+  
+  /**
+   * Restore timer state from localStorage on mount
+   */
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(TIMER_STORAGE_KEY);
+      if (!stored) return;
+      
+      const storageState: TimerStorageState = JSON.parse(stored);
+      
+      // Only restore if it's for this task
+      if (storageState.taskId !== taskId) return;
+      
+      const { timeTracking: storedTracking, savedAt } = storageState;
+      
+      // If timer was running when saved, calculate elapsed time since save
+      if (storedTracking.status === 'in_progress' && storedTracking.startedAt) {
+        const savedAtTime = new Date(savedAt).getTime();
+        const now = Date.now();
+        const timeSinceSave = now - savedAtTime;
+        
+        // Add time since save to accumulated time
+        const updatedTracking: TimeTrackingState = {
+          ...storedTracking,
+          accumulatedMs: storedTracking.accumulatedMs + timeSinceSave,
+          startedAt: new Date().toISOString() // Reset start time to now
+        };
+        
+        setTimeTracking(updatedTracking);
+        setElapsedMs(updatedTracking.accumulatedMs);
+        
+        // Auto-resume the timer
+        startTimerInternal(updatedTracking.accumulatedMs);
+      } else {
+        // Just restore the state without resuming
+        setTimeTracking(storedTracking);
+        setElapsedMs(storedTracking.accumulatedMs);
+      }
+    } catch (e) {
+      console.warn('Failed to restore timer state from localStorage:', e);
+    }
+  }, [taskId, startTimerInternal]);
+  
+  /**
+   * Notify parent of state changes
+   */
+  useEffect(() => {
+    onStateChange?.(timeTracking);
+  }, [timeTracking, onStateChange]);
   
   /**
    * Start the timer

@@ -69,12 +69,6 @@ function AppContent() {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-8 py-4 sm:py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-8 py-4 sm:py-8">
-          {/* Analytics Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <QuickStatsWidget />
-            <TimeAnalyticsWidget />
-          </div>
-          
           <div>
             <ScheduleView 
               selectedDate={selectedDate}
@@ -91,6 +85,12 @@ function AppContent() {
             selectedTime={selectedTimeBlock ? selectedTimeBlock.toString() : null}
             onTaskCreate={handleTaskCreate}
           />
+
+          {/* Analytics Widgets */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            <QuickStatsWidget />
+            <TimeAnalyticsWidget />
+          </div>
         </div>
       </main>
 
