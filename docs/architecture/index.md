@@ -24,8 +24,6 @@
     - [Notification Service](./components.md#notification-service)
     - [Sync Engine](./components.md#sync-engine)
   - [External APIs](./external-apis.md)
-    - [Google Calendar API](./external-apis.md#google-calendar-api)
-    - [OpenAI API (Optional - Phase 4)](./external-apis.md#openai-api-optional-phase-4)
   - [Core Workflows](./core-workflows.md)
     - [Task Creation & Sync Flow](./core-workflows.md#task-creation-sync-flow)
   - [Database Schema](./database-schema.md)

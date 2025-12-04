@@ -6,7 +6,7 @@
 - **Required Rules:** Validate all request bodies and query params against Zod schemas.
 
 ## Authentication & Authorization
-- **Auth Method:** Simple Token/Password for local, OAuth for Google/Outlook.
+- **Auth Method:** Simple Token/Password for local use.
 - **Session Management:** JWT or Session Cookies.
 
 ## Secrets Management

@@ -43,9 +43,7 @@ src/
 │   ├── layout/             # Layout components (Header, Sidebar, MobileNav)
 │   ├── features/           # Feature-specific components
 │   │   ├── tasks/          # Task-related components (TaskList, TaskItem)
-│   │   ├── calendar/       # Calendar & TimeBlock components
-│   │   ├── analytics/      # Analytics charts and widgets
-│   │   └── focus/          # Focus mode components
+│   │   └── calendar/       # Calendar & TimeBlock components
 │   └── common/             # Common utilities (ErrorBoundary, Loading)
 ├── hooks/                  # Custom React hooks
 │   ├── use-sync.ts         # Sync logic hook
@@ -57,7 +55,6 @@ src/
 │   └── utils.ts            # Helper functions
 ├── pages/                  # Route components
 │   ├── Dashboard.tsx
-│   ├── Analytics.tsx
 │   ├── Settings.tsx
 │   └── ...
 ├── services/               # Business logic and API services

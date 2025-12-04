@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { 
+  ResponsiveDialog, 
+  ResponsiveDialogContent, 
+  ResponsiveDialogHeader, 
+  ResponsiveDialogTitle 
+} from '../ui/responsive-dialog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
@@ -86,10 +91,10 @@ export function EditTaskDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent className="sm:max-w-[425px]">
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle className="flex items-center gap-2">
             Edit Task
             {hasRecurrence && (
               <Badge variant="secondary" className="flex items-center gap-1">
@@ -97,14 +102,15 @@ export function EditTaskDialog({
                 {isInstance ? 'Instance' : 'Series'}
               </Badge>
             )}
-          </DialogTitle>
-        </DialogHeader>
+          </ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
               placeholder="Task title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="min-h-[44px] sm:min-h-0"
             />
           </div>
           {!persistent && (
@@ -113,6 +119,7 @@ export function EditTaskDialog({
                 type="datetime-local"
                 value={scheduledTime?.slice(0, 16) || ''}
                 onChange={(e) => setScheduledTime(new Date(e.target.value).toISOString())}
+                className="min-h-[44px] sm:min-h-0"
               />
             </div>
           )}
@@ -121,13 +128,13 @@ export function EditTaskDialog({
               value={project || "no-project"} 
               onValueChange={(value) => setProject(value === "no-project" ? undefined : value as ProjectName)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="min-h-[44px] sm:min-h-0">
                 <SelectValue placeholder="Select a project (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="no-project">No Project</SelectItem>
+                <SelectItem value="no-project" className="min-h-[44px] sm:min-h-0">No Project</SelectItem>
                 {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.title}>
+                  <SelectItem key={p.id} value={p.title} className="min-h-[44px] sm:min-h-0">
                     {p.title}
                   </SelectItem>
                 ))}
@@ -156,6 +163,7 @@ export function EditTaskDialog({
                 value={estimatedDuration}
                 onChange={(e) => setEstimatedDuration(e.target.value)}
                 min={1}
+                className="min-h-[44px] sm:min-h-0"
               />
             </div>
             <div className="space-y-1">
@@ -169,6 +177,7 @@ export function EditTaskDialog({
                 value={manualActualDuration}
                 onChange={(e) => setManualActualDuration(e.target.value)}
                 min={0}
+                className="min-h-[44px] sm:min-h-0"
               />
             </div>
           </div>
@@ -217,31 +226,35 @@ export function EditTaskDialog({
             </div>
           )}
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-h-[44px] sm:min-h-0">
             <Checkbox 
               id="persistent-edit"
               checked={persistent}
               onCheckedChange={(checked: boolean) => setPersistent(checked)}
+              className="h-5 w-5 sm:h-4 sm:w-4"
             />
             <label 
               htmlFor="persistent-edit" 
-              className="text-sm text-gray-700 cursor-pointer"
+              className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
             >
               Make task persistent (shows on all days until completed)
             </label>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              className="min-h-[48px] sm:min-h-0"
             >
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" className="min-h-[48px] sm:min-h-0">
+              Save Changes
+            </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 } 

@@ -36,7 +36,7 @@ function TaskListDropZone({ children }: { children: React.ReactNode }) {
     <div
       ref={setNodeRef}
       className={`
-        flex-1 min-w-[320px] max-w-md transition-all duration-150
+        flex-1 w-full sm:min-w-[320px] sm:max-w-md transition-all duration-150
         ${isDragActive ? 'ring-2 ring-dashed ring-muted-foreground/30 rounded-lg' : ''}
         ${isOver ? 'ring-2 ring-primary ring-solid bg-primary/5 rounded-lg' : ''}
       `}
@@ -122,7 +122,7 @@ export function TaskList({ tasks, onTaskUpdate, onEdit, onDelete }: TaskListProp
               <div key={group.name} className="border rounded-lg p-2">
                 <Button
                   variant="ghost"
-                  className="w-full flex justify-between items-center p-2"
+                  className="w-full flex justify-between items-center p-2 min-h-[48px] sm:min-h-0"
                   onClick={() => toggleProject(group.name)}
                 >
                   <span className="font-semibold">

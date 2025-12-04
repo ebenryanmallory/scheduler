@@ -66,10 +66,10 @@ function QuickStatsWidget() {
 
   return (
     <div className="w-full bg-card border rounded-lg overflow-hidden">
-      {/* Header */}
+      {/* Header - touch-friendly */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors min-h-[48px] sm:min-h-0"
       >
         <div className="flex items-center gap-2">
           <h3 className="font-semibold">Quick Stats</h3>
@@ -90,7 +90,7 @@ function QuickStatsWidget() {
       {/* Content */}
       {!isCollapsed && (
         <div className="p-4 pt-0">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Daily Progress */}
             <div className="rounded-lg p-3 bg-muted/50">
               <div className="text-xs text-muted-foreground mb-1">Progress</div>

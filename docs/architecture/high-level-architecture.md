@@ -8,7 +8,7 @@ The Scheduler App follows a **Monolithic Client-Server Architecture** with a hea
 
 1.  **Architectural Style**: **Local-First Monolith**. The application logic resides primarily in the client (Thick Client), with the server acting as a synchronization gateway and integration point for external services.
 2.  **Repository Structure**: **Monorepo**. Both frontend and backend reside in the same repository for easier code sharing (types) and coordinated deployments.
-3.  **Service Architecture**: **Monolith**. A single Express server handles all API requests. Future compute-intensive features (AI) may be offloaded to serverless functions if needed, but the core remains monolithic for simplicity.
+3.  **Service Architecture**: **Monolith**. A single Express server handles all API requests. The core remains monolithic for simplicity.
 4.  **Data Flow**:
     -   **Read**: Frontend checks local cache (IndexedDB/Zustand) -> fetches from Server if stale -> Server reads from File System.
     -   **Write**: Frontend updates local cache (Optimistic UI) -> queues sync to Server -> Server writes to File System -> Server commits to Git.
@@ -34,13 +34,6 @@ graph TD
         Server -->|File I/O| FS[File System]
         Server -->|Git Ops| Git[Git Service]
         Server -->|Auth| Auth[Auth Middleware]
-        Server -->|External APIs| Ext[Integration Services]
-    end
-    
-    subgraph External Services
-        Ext -->|Sync| GCal[Google Calendar]
-        Ext -->|Sync| Outlook[Outlook Calendar]
-        Ext -->|AI| OpenAI[OpenAI/Claude API]
     end
     
     FS <-->|Version Control| Repo[(Git Repository)]

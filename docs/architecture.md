@@ -61,13 +61,6 @@ graph TD
         Server -->|File I/O| FS[File System]
         Server -->|Git Ops| Git[Git Service]
         Server -->|Auth| Auth[Auth Middleware]
-        Server -->|External APIs| Ext[Integration Services]
-    end
-    
-    subgraph External Services
-        Ext -->|Sync| GCal[Google Calendar]
-        Ext -->|Sync| Outlook[Outlook Calendar]
-        Ext -->|AI| OpenAI[OpenAI/Claude API]
     end
     
     FS <-->|Version Control| Repo[(Git Repository)]
@@ -221,22 +214,7 @@ graph TD
 
 ## External APIs
 
-### Google Calendar API
-
-- **Purpose:** Sync tasks with Google Calendar events.
-- **Authentication:** OAuth 2.0
-- **Key Endpoints Used:**
-    - `GET /events` - Fetch events
-    - `POST /events` - Create event from task
-- **Integration Notes:** Need to handle token refresh and rate limiting.
-
-### OpenAI API (Optional - Phase 4)
-
-- **Purpose:** AI suggestions for scheduling.
-- **Authentication:** API Key
-- **Key Endpoints Used:**
-    - `POST /v1/chat/completions` - Generate schedule suggestions
-- **Integration Notes:** strictly server-side to protect API keys.
+*No external API integrations are currently planned for the three implemented epics. This section can be expanded if external integrations are added in the future.*
 
 ---
 
@@ -405,7 +383,7 @@ scheduler/
 - **Required Rules:** Validate all request bodies and query params against Zod schemas.
 
 ### Authentication & Authorization
-- **Auth Method:** Simple Token/Password for local, OAuth for Google/Outlook.
+- **Auth Method:** Simple Token/Password for local use.
 - **Session Management:** JWT or Session Cookies.
 
 ### Secrets Management
@@ -421,5 +399,5 @@ scheduler/
 Create a comprehensive Frontend Architecture Document based on this architecture. Focus on:
 1.  **Offline Sync Implementation:** Detailed design of the `SyncEngine` and IndexedDB schema.
 2.  **State Management:** How Zustand will handle optimistic updates and sync status.
-3.  **Component Hierarchy:** Organization of the new feature components (TimeTracking, Analytics).
+3.  **Component Hierarchy:** Organization of the new feature components (TimeTracking, Offline Sync).
 4.  **PWA Configuration:** Service worker strategy for caching and background sync.

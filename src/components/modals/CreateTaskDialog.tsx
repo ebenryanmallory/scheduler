@@ -1,6 +1,11 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { 
+  ResponsiveDialog, 
+  ResponsiveDialogContent, 
+  ResponsiveDialogHeader, 
+  ResponsiveDialogTitle 
+} from "@/components/ui/responsive-dialog"
 import { useState } from "react"
 import { TaskType } from "@/types/task"
 import { CreateTaskDialogProps, ProjectName } from "@/types/dialog"
@@ -121,33 +126,33 @@ function CreateTaskDialog({
   const availableProjects = getDisplayProjects()
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle className="flex items-center justify-between">
             <span>Create New Task</span>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setTemplateLibraryOpen(true)}
-              className="ml-2"
+              className="ml-2 min-h-[44px] sm:min-h-0"
             >
               <FileText className="h-4 w-4 mr-1" />
               Templates
             </Button>
-          </DialogTitle>
-        </DialogHeader>
+          </ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <p className="text-sm text-gray-500 mb-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
               {effectiveDate?.toLocaleDateString('en-US', { 
                 month: 'long', 
                 day: 'numeric', 
                 year: 'numeric' 
               })}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Time: {displayTime}
             </p>
           </div>
@@ -157,15 +162,16 @@ function CreateTaskDialog({
             value={title}
             onChange={(e) => setTitle(e.target.value)} 
             required
+            className="min-h-[44px] sm:min-h-0"
           />
           
           <Select value={project} onValueChange={(value) => setProject(value as ProjectName)}>
-            <SelectTrigger>
+            <SelectTrigger className="min-h-[44px] sm:min-h-0">
               <SelectValue placeholder="Select project (optional)" />
             </SelectTrigger>
             <SelectContent>
               {availableProjects.map((project) => (
-                <SelectItem key={project.id} value={project.title}>
+                <SelectItem key={project.id} value={project.title} className="min-h-[44px] sm:min-h-0">
                   {project.title}
                 </SelectItem>
               ))}
@@ -179,6 +185,7 @@ function CreateTaskDialog({
               value={estimatedDuration}
               onChange={(e) => setEstimatedDuration(e.target.value)}
               min={1}
+              className="min-h-[44px] sm:min-h-0"
             />
           </div>
 
@@ -189,21 +196,22 @@ function CreateTaskDialog({
             startDate={effectiveDate ?? undefined}
           />
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-h-[44px] sm:min-h-0">
             <Checkbox 
               id="persistent"
               checked={persistent}
               onCheckedChange={(checked) => setPersistent(checked as boolean)}
+              className="h-5 w-5 sm:h-4 sm:w-4"
             />
             <label 
               htmlFor="persistent" 
-              className="text-sm text-gray-700 cursor-pointer"
+              className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
             >
               Make task persistent (shows on all days until completed)
             </label>
           </div>
           
-          <Button type="submit">
+          <Button type="submit" className="w-full min-h-[48px] sm:w-auto sm:min-h-0">
             Create Task
           </Button>
         </form>
@@ -214,8 +222,8 @@ function CreateTaskDialog({
           onOpenChange={setTemplateLibraryOpen}
           onSelectTemplate={applyTemplate}
         />
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
 

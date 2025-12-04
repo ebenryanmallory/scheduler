@@ -81,8 +81,8 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
   if (!selectedDate) return null
 
   return (
-    <div className="max-w-96 rounded-md border p-4">
-      <h2 className="font-semibold mb-4">
+    <div className="w-full sm:max-w-96 rounded-md border p-3 sm:p-4">
+      <h2 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">
         {selectedDate.toLocaleDateString('en-US', { 
           weekday: 'long',
           month: 'long', 
@@ -94,7 +94,7 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
       {!isWorkday(selectedDate) ? (
         <p className="text-muted-foreground text-sm">No schedule available for Mondays and Fridays</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 sm:space-y-2">
           {timeBlocks.map(({ time: scheduledTime }) => {
             const activity = getActivityForBlock(scheduledTime)
             const isSelected = selectedBlock === scheduledTime
@@ -123,25 +123,27 @@ function TimeBlocksPanel({ selectedDate, onAddTask, tasks }: TimeBlocksPanelProp
                         setExpandedBlock(expandedBlock === scheduledTime ? null : scheduledTime)
                       }
                     }}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors
+                    className={`
+                      p-3 sm:p-3 border rounded-lg cursor-pointer transition-colors
+                      min-h-[48px] sm:min-h-0
                       ${activity ? 'bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900' : 'hover:bg-muted'}
                       ${isSelected ? 'ring-2 ring-primary' : ''}
                       ${isExpandable ? 'border-l-4 border-l-primary' : ''}
                     `}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-sm">
+                      <span className="font-medium text-sm sm:text-sm">
                         {formatTimeToAMPM(scheduledTime)}
                         {activity?.duration && activity.duration > 30 && (
                           ` - ${formatTimeToAMPM(addMinutes(scheduledTime, activity.duration))}`
                         )}
                       </span>
                       {isExpandable && (
-                        <span className="text-xs text-primary">
+                        <span className="text-xs text-primary p-1">
                           {expandedBlock === scheduledTime ? (
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-5 w-5 sm:h-4 sm:w-4" />
                           ) : (
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
                           )}
                         </span>
                       )}

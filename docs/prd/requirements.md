@@ -18,39 +18,25 @@
 
 **FR8**: The system shall support task templates for common activities (e.g., "Deep Work Session")
 
-**FR9**: The system shall provide a focus mode with full-screen view showing only the current task
+**FR9**: The system shall export tasks and schedules to CSV, JSON, and iCal formats
 
-**FR10**: The system shall integrate Pomodoro timer functionality for time-boxed work sessions
+**FR10**: The system shall support offline operation with automatic sync when connectivity is restored
 
-**FR11**: The system shall export tasks and schedules to CSV, JSON, and iCal formats
+**FR11**: The system shall automatically commit and push changes to Git repository with conflict resolution UI
 
-**FR12**: The system shall import events from Google Calendar and Outlook
+**FR12**: The system shall support custom keyboard shortcuts for all major operations
 
-**FR13**: The system shall provide an analytics dashboard showing completion rates, time distribution, and productivity trends
+**FR13**: The system shall allow color-coding and tagging of tasks for visual organization
 
-**FR14**: The system shall support offline operation with automatic sync when connectivity is restored
+**FR14**: The system shall archive completed tasks with ability to view and restore from archive
 
-**FR15**: The system shall automatically commit and push changes to Git repository with conflict resolution UI
+**FR15**: The system shall provide quick stats widget showing daily progress and weekly streaks
 
-**FR16**: The system shall provide AI-powered suggestions for optimal time blocks based on historical patterns
+**FR16**: The system shall provide a command palette (Cmd/K) for quick access to all features
 
-**FR17**: The system shall support custom keyboard shortcuts for all major operations
+**FR17**: The system shall support undo/redo functionality for all task operations
 
-**FR18**: The system shall allow color-coding and tagging of tasks for visual organization
-
-**FR19**: The system shall archive completed tasks with ability to view and restore from archive
-
-**FR20**: The system shall provide quick stats widget showing daily progress and weekly streaks
-
-**FR21**: The system shall send health and wellness reminders (water intake, posture, stretches) during long work sessions
-
-**FR22**: The system shall support project-level time tracking with progress bars and milestones
-
-**FR23**: The system shall provide a command palette (Cmd/K) for quick access to all features
-
-**FR24**: The system shall support undo/redo functionality for all task operations
-
-**FR25**: The system shall provide bulk operations (complete all, delete multiple, reschedule batch)
+**FR18**: The system shall provide bulk operations (complete all, delete multiple, reschedule batch)
 
 ## Non-Functional Requirements
 

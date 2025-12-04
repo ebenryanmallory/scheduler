@@ -77,7 +77,7 @@ function TimeAnalyticsWidget() {
   return (
     <>
       <div className="w-full bg-card border rounded-lg overflow-hidden">
-        {/* Header */}
+        {/* Header - touch-friendly */}
         <div
           role="button"
           tabIndex={0}
@@ -88,7 +88,7 @@ function TimeAnalyticsWidget() {
               setIsCollapsed(!isCollapsed);
             }
           }}
-          className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer"
+          className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer min-h-[48px] sm:min-h-0"
         >
           <div className="flex items-center gap-2">
             <h3 className="font-semibold">Time Analytics</h3>
@@ -124,7 +124,7 @@ function TimeAnalyticsWidget() {
         {!isCollapsed && (
           <div className="p-4 pt-0 space-y-4">
             {/* Daily Stats Section */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* Today's Time */}
               <div className="rounded-lg p-3 bg-muted/50">
                 <div className="text-xs text-muted-foreground mb-1">Today</div>
@@ -267,7 +267,7 @@ function TimeAnalyticsWidget() {
             <Button
               variant="outline"
               onClick={() => setIsHistoryOpen(true)}
-              className="w-full"
+              className="w-full min-h-[44px] sm:min-h-0"
             >
               View History
             </Button>

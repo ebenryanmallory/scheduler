@@ -8,16 +8,14 @@
 
 - Enhance the calendar-driven task organizer to support recurring tasks, time tracking, and intelligent scheduling
 - Improve mobile responsiveness and offline capabilities for on-the-go productivity
-- Implement smart notifications and focus mode to maximize deep work sessions
-- Add analytics and insights to help users understand and optimize their productivity patterns
-- Integrate with external calendars and health tracking systems for holistic time management
+- Implement smart notifications to maximize deep work sessions
 - Maintain the unique markdown-based storage with Git sync as a competitive advantage
 
 ### Background Context
 
 The Scheduler App is a calendar-driven task organizer designed for founders managing multiple startups who need to maximize productivity through structured time blocking. The current MVP provides basic task management with time blocks, projects, and ideas, but lacks critical features for sustained productivity such as recurring tasks, time tracking, and mobile optimization.
 
-This PRD outlines enhancements to transform the scheduler from a basic task organizer into a comprehensive productivity system. The improvements are organized into 5 phases over 12-16 weeks, prioritizing high-impact foundational features first. The app's unique selling point—markdown-based storage with Git sync—will be preserved and enhanced with better conflict resolution and multi-device support.
+This PRD outlines enhancements to transform the scheduler from a basic task organizer into a comprehensive productivity system. The improvements are organized into 3 epics, prioritizing high-impact foundational features first. The app's unique selling point—markdown-based storage with Git sync—will be preserved and enhanced with better conflict resolution and multi-device support.
 
 ### Change Log
 
@@ -47,39 +45,25 @@ This PRD outlines enhancements to transform the scheduler from a basic task orga
 
 **FR8**: The system shall support task templates for common activities (e.g., "Deep Work Session")
 
-**FR9**: The system shall provide a focus mode with full-screen view showing only the current task
+**FR9**: The system shall export tasks and schedules to CSV, JSON, and iCal formats
 
-**FR10**: The system shall integrate Pomodoro timer functionality for time-boxed work sessions
+**FR10**: The system shall support offline operation with automatic sync when connectivity is restored
 
-**FR11**: The system shall export tasks and schedules to CSV, JSON, and iCal formats
+**FR11**: The system shall automatically commit and push changes to Git repository with conflict resolution UI
 
-**FR12**: The system shall import events from Google Calendar and Outlook
+**FR12**: The system shall support custom keyboard shortcuts for all major operations
 
-**FR13**: The system shall provide an analytics dashboard showing completion rates, time distribution, and productivity trends
+**FR13**: The system shall allow color-coding and tagging of tasks for visual organization
 
-**FR14**: The system shall support offline operation with automatic sync when connectivity is restored
+**FR14**: The system shall archive completed tasks with ability to view and restore from archive
 
-**FR15**: The system shall automatically commit and push changes to Git repository with conflict resolution UI
+**FR15**: The system shall provide quick stats widget showing daily progress and weekly streaks
 
-**FR16**: The system shall provide AI-powered suggestions for optimal time blocks based on historical patterns
+**FR16**: The system shall provide a command palette (Cmd/K) for quick access to all features
 
-**FR17**: The system shall support custom keyboard shortcuts for all major operations
+**FR17**: The system shall support undo/redo functionality for all task operations
 
-**FR18**: The system shall allow color-coding and tagging of tasks for visual organization
-
-**FR19**: The system shall archive completed tasks with ability to view and restore from archive
-
-**FR20**: The system shall provide quick stats widget showing daily progress and weekly streaks
-
-**FR21**: The system shall send health and wellness reminders (water intake, posture, stretches) during long work sessions
-
-**FR22**: The system shall support project-level time tracking with progress bars and milestones
-
-**FR23**: The system shall provide a command palette (Cmd/K) for quick access to all features
-
-**FR24**: The system shall support undo/redo functionality for all task operations
-
-**FR25**: The system shall provide bulk operations (complete all, delete multiple, reschedule batch)
+**FR18**: The system shall provide bulk operations (complete all, delete multiple, reschedule batch)
 
 ### Non-Functional Requirements
 
@@ -127,19 +111,16 @@ The Scheduler App should provide a clean, distraction-free interface that helps 
 - **Quick Add**: Keyboard shortcut (Cmd/Ctrl + N) to add tasks from anywhere
 - **Command Palette**: Cmd/K to access all features without leaving keyboard
 - **Swipe Gestures**: Mobile-specific gestures for navigation and task actions
-- **Focus Mode**: Full-screen immersive mode for deep work sessions
 - **Progressive Disclosure**: Show essential information by default, reveal details on demand
 
 ### Core Screens and Views
 
 1. **Main Dashboard** - Calendar view with time blocks and task list
 2. **Task Detail Modal** - Full task editing with all fields and options
-3. **Analytics Dashboard** - Charts and insights for productivity patterns
-4. **Focus Mode** - Full-screen view with current task and timer
-5. **Settings Page** - Preferences, integrations, and account settings
-6. **Archive View** - Historical completed tasks with search and filter
-7. **Projects View** - Project-level overview with milestones and progress
-8. **Ideas Parking Lot** - Quick capture and organization of future ideas
+3. **Settings Page** - Preferences and account settings
+4. **Archive View** - Historical completed tasks with search and filter
+5. **Projects View** - Project-level overview with progress
+6. **Ideas Parking Lot** - Quick capture and organization of future ideas
 
 ### Accessibility
 
@@ -173,9 +154,9 @@ Web Responsive (desktop and mobile browsers), with PWA installation support for 
 
 ### Service Architecture
 
-**Monolith with Serverless Functions** - The current Express backend will be enhanced with additional API endpoints. Consider migrating compute-intensive operations (AI suggestions, analytics) to serverless functions for scalability.
+**Monolith** - The current Express backend will be enhanced with additional API endpoints.
 
-**Rationale**: The current architecture is appropriate for the project scale. Serverless functions can be added incrementally for specific features without full microservices migration.
+**Rationale**: The current architecture is appropriate for the project scale and remains monolithic for simplicity.
 
 ### Testing Requirements
 
@@ -191,9 +172,6 @@ Web Responsive (desktop and mobile browsers), with PWA installation support for 
 - **PWA**: Leverage existing vite-plugin-pwa configuration, enhance with offline queue and background sync
 - **Storage**: IndexedDB for offline data, localStorage for user preferences
 - **Git Integration**: Server-side Git operations using simple-git or similar library
-- **Calendar APIs**: Google Calendar API and Microsoft Graph API for calendar integrations
-- **AI Integration**: OpenAI API or Anthropic Claude for AI-powered suggestions (optional, Phase 4)
-- **Analytics**: Client-side analytics with recharts or chart.js for visualization
 - **Notifications**: Web Notifications API for browser notifications
 - **Testing**: Vitest for unit tests, Playwright for E2E tests
 - **CI/CD**: GitHub Actions for automated testing and deployment
@@ -208,10 +186,6 @@ Web Responsive (desktop and mobile browsers), with PWA installation support for 
 **Epic 2: Core Productivity Features** - Implement time tracking, drag & drop scheduling, recurring tasks, and quick stats to significantly enhance productivity workflows
 
 **Epic 3: Mobile & Offline Excellence** - Optimize mobile responsiveness, implement full offline support with PWA capabilities, and enhance Git sync for reliable multi-device usage
-
-**Epic 4: Analytics & Intelligence** - Add analytics dashboard, focus mode with Pomodoro timer, and AI-powered suggestions to provide insights and optimize productivity
-
-**Epic 5: Integrations & Ecosystem** - Connect with external calendars (Google, Outlook), health tracking systems, and implement advanced project management features
 
 ---
 
@@ -468,175 +442,6 @@ so that **my tasks stay synchronized without manual intervention**.
 
 ---
 
-## Epic 4: Analytics & Intelligence
-
-**Goal**: Provide insights and smart features to help users understand and optimize their productivity. This epic adds an analytics dashboard with charts and trends, implements focus mode for distraction-free work, and introduces AI-powered suggestions for optimal scheduling based on historical patterns.
-
-### Story 4.1: Analytics Dashboard Foundation
-
-As a **data-driven user**,
-I want **to see analytics about my productivity**,
-so that **I can identify patterns and optimize my schedule**.
-
-#### Acceptance Criteria
-
-1. The system shall provide a dedicated analytics page accessible from main navigation
-2. The dashboard shall display task completion rate chart (daily, weekly, monthly)
-3. The dashboard shall show time distribution by project/category as a pie chart
-4. The dashboard shall display productivity trends over time as a line chart
-5. The dashboard shall show estimated vs. actual time variance as a bar chart
-6. The dashboard shall provide custom date range selector
-7. The dashboard shall allow exporting analytics data to CSV
-8. The dashboard shall use recharts or chart.js for visualizations
-9. The dashboard shall cache analytics calculations for performance
-10. The dashboard shall be responsive and work on mobile devices
-11. The dashboard shall aggregate data on the server to prevent client-side performance issues
-
-### Story 4.2: Advanced Analytics Reports
-
-As a **user seeking deeper insights**,
-I want **weekly and monthly productivity reports**,
-so that **I can track long-term trends and improvements**.
-
-#### Acceptance Criteria
-
-1. The system shall generate weekly productivity reports every Monday
-2. The system shall generate monthly productivity reports on the 1st of each month
-3. Reports shall include completion rate, time tracking accuracy, and streak information
-4. Reports shall show week-over-week or month-over-month comparisons
-5. Reports shall highlight top performing days and times
-6. Reports shall identify patterns (e.g., "You're most productive on Tuesday mornings")
-7. Reports shall be accessible from the analytics dashboard
-8. Reports shall be exportable as PDF or email
-9. Reports shall include actionable recommendations based on data
-10. The system shall allow users to opt-in to email delivery of reports
-
-### Story 4.3: Focus Mode with Pomodoro Timer
-
-As a **user seeking deep work sessions**,
-I want **a distraction-free focus mode with Pomodoro timer**,
-so that **I can concentrate fully on my current task**.
-
-#### Acceptance Criteria
-
-1. The system shall provide a focus mode accessible via button or keyboard shortcut (F)
-2. Focus mode shall display full-screen view showing only the current task
-3. Focus mode shall include a Pomodoro timer (25 min work, 5 min break by default)
-4. The timer settings shall be customizable (work duration, break duration)
-5. Focus mode shall track focus sessions and display statistics
-6. Focus mode shall provide break reminders with notification and sound
-7. Focus mode shall allow exiting with Escape key or exit button
-8. Focus mode shall optionally play ambient sounds/music (white noise, rain, etc.)
-9. Focus mode shall use browser Fullscreen API for immersive experience
-10. Focus mode shall show minimal UI (task title, timer, exit button only)
-11. The system shall log completed Pomodoro sessions for analytics
-
-### Story 4.4: AI-Powered Scheduling Suggestions
-
-As a **user wanting to optimize my schedule**,
-I want **AI suggestions for optimal task timing**,
-so that **I can schedule tasks when I'm most likely to complete them successfully**.
-
-#### Acceptance Criteria
-
-1. The system shall analyze historical task completion patterns
-2. The system shall suggest optimal time blocks for new tasks based on task type
-3. The system shall auto-categorize tasks using AI (e.g., "deep work", "meetings", "admin")
-4. The system shall estimate task duration based on historical data for similar tasks
-5. The system shall suggest break times based on focus duration patterns
-6. The system shall provide productivity insights and recommendations
-7. The system shall display AI suggestions in a dedicated panel
-8. The system shall allow users to accept or reject suggestions
-9. The system shall use OpenAI API or Anthropic Claude for AI features
-10. The system shall implement privacy-first approach (no data sharing without consent)
-11. The system shall work gracefully when AI API is unavailable (degrade to basic features)
-
----
-
-## Epic 5: Integrations & Ecosystem
-
-**Goal**: Connect the scheduler with external tools and services to create a comprehensive productivity ecosystem. This epic integrates with Google Calendar and Outlook for unified scheduling, adds health and wellness features, and implements advanced project management capabilities.
-
-### Story 5.1: Google Calendar Integration
-
-As a **user with existing Google Calendar events**,
-I want **to import and sync with Google Calendar**,
-so that **I can see all my commitments in one place**.
-
-#### Acceptance Criteria
-
-1. The system shall implement Google OAuth 2.0 authentication flow
-2. The system shall import events from user's Google Calendar
-3. The system shall display Google Calendar events alongside scheduler tasks
-4. The system shall support two-way sync (changes in scheduler update Google Calendar)
-5. The system shall handle recurring events from Google Calendar
-6. The system shall detect and highlight conflicts between scheduler tasks and calendar events
-7. The system shall allow users to choose which calendars to sync
-8. The system shall respect Google Calendar privacy settings
-9. The system shall refresh calendar data every 15 minutes
-10. The system shall handle OAuth token refresh automatically
-11. The system shall provide clear error messages for authentication failures
-
-### Story 5.2: Outlook Calendar Integration
-
-As a **user with Outlook calendar**,
-I want **to integrate with Outlook**,
-so that **I can sync my work calendar with my personal scheduler**.
-
-#### Acceptance Criteria
-
-1. The system shall implement Microsoft OAuth 2.0 authentication flow
-2. The system shall import events from user's Outlook calendar using Microsoft Graph API
-3. The system shall display Outlook events alongside scheduler tasks
-4. The system shall support two-way sync with Outlook calendar
-5. The system shall handle recurring events from Outlook
-6. The system shall detect conflicts between scheduler tasks and Outlook events
-7. The system shall allow users to choose which Outlook calendars to sync
-8. The system shall refresh calendar data every 15 minutes
-9. The system shall handle OAuth token refresh automatically
-10. The system shall work with both personal and work Microsoft accounts
-
-### Story 5.3: Health and Wellness Reminders
-
-As a **user focused on holistic productivity**,
-I want **health and wellness reminders during work sessions**,
-so that **I maintain physical health while being productive**.
-
-#### Acceptance Criteria
-
-1. The system shall send water intake reminders every 60 minutes during work hours
-2. The system shall send posture check reminders every 30 minutes during focus sessions
-3. The system shall send stretch break reminders after 90 minutes of continuous work
-4. The system shall allow users to customize reminder frequency in settings
-5. The system shall track water intake with simple increment/decrement buttons
-6. The system shall provide a health widget showing daily health metrics
-7. The system shall integrate with Apple Health (iOS) for step and activity data
-8. The system shall integrate with Fitbit API for fitness tracker data
-9. The system shall respect user's sleep schedule (10 PM - 6 AM) and not send reminders
-10. The system shall allow users to snooze or dismiss health reminders
-11. All health data shall be stored locally and never shared without explicit consent
-
-### Story 5.4: Enhanced Project Management
-
-As a **user managing multiple projects**,
-I want **advanced project management features**,
-so that **I can track progress toward long-term goals**.
-
-#### Acceptance Criteria
-
-1. The system shall display progress bars for each project based on completed tasks
-2. The system shall support project milestones with target dates
-3. The system shall automatically link tasks to projects based on tags or manual assignment
-4. The system shall provide project-level time tracking (sum of all task times)
-5. The system shall allow creating project templates for common project types
-6. The system shall provide a Gantt chart view showing project timeline
-7. The system shall show critical path for projects with task dependencies
-8. The system shall send notifications when project milestones are approaching
-9. The system shall allow exporting project reports with all tasks and time data
-10. The system shall support project archiving when completed
-
----
-
 ## Checklist Results Report
 
 *This section will be populated after running the PM checklist to validate the PRD completeness and quality.*
@@ -647,8 +452,8 @@ so that **I can track progress toward long-term goals**.
 
 ### UX Expert Prompt
 
-Please review this PRD and create a comprehensive Front-End Specification document that details the user interface design, component architecture, and user experience flows for all features outlined in the five epics. Focus on mobile-first responsive design, accessibility (WCAG AA), and the dark mode implementation.
+Please review this PRD and create a comprehensive Front-End Specification document that details the user interface design, component architecture, and user experience flows for all features outlined in the three epics. Focus on mobile-first responsive design, accessibility (WCAG AA), and the dark mode implementation.
 
 ### Architect Prompt
 
-Please review this PRD and create a comprehensive Architecture Document that details the technical implementation approach, data models, API endpoints, service architecture, and infrastructure requirements for all features outlined in the five epics. Pay special attention to offline sync, Git integration, calendar API integrations, and the testing strategy.
+Please review this PRD and create a comprehensive Architecture Document that details the technical implementation approach, data models, API endpoints, service architecture, and infrastructure requirements for all features outlined in the three epics. Pay special attention to offline sync, Git integration, and the testing strategy.

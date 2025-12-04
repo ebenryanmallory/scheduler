@@ -6,8 +6,4 @@
 
 **Epic 3: Mobile & Offline Excellence** - Optimize mobile responsiveness, implement full offline support with PWA capabilities, and enhance Git sync for reliable multi-device usage
 
-**Epic 4: Analytics & Intelligence** - Add analytics dashboard, focus mode with Pomodoro timer, and AI-powered suggestions to provide insights and optimize productivity
-
-**Epic 5: Integrations & Ecosystem** - Connect with external calendars (Google, Outlook), health tracking systems, and implement advanced project management features
-
 ---

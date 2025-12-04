@@ -10,19 +10,16 @@ The Scheduler App should provide a clean, distraction-free interface that helps 
 - **Quick Add**: Keyboard shortcut (Cmd/Ctrl + N) to add tasks from anywhere
 - **Command Palette**: Cmd/K to access all features without leaving keyboard
 - **Swipe Gestures**: Mobile-specific gestures for navigation and task actions
-- **Focus Mode**: Full-screen immersive mode for deep work sessions
 - **Progressive Disclosure**: Show essential information by default, reveal details on demand
 
 ## Core Screens and Views
 
 1. **Main Dashboard** - Calendar view with time blocks and task list
 2. **Task Detail Modal** - Full task editing with all fields and options
-3. **Analytics Dashboard** - Charts and insights for productivity patterns
-4. **Focus Mode** - Full-screen view with current task and timer
-5. **Settings Page** - Preferences, integrations, and account settings
-6. **Archive View** - Historical completed tasks with search and filter
-7. **Projects View** - Project-level overview with milestones and progress
-8. **Ideas Parking Lot** - Quick capture and organization of future ideas
+3. **Settings Page** - Preferences and account settings
+4. **Archive View** - Historical completed tasks with search and filter
+5. **Projects View** - Project-level overview with progress
+6. **Ideas Parking Lot** - Quick capture and organization of future ideas
 
 ## Accessibility
 

@@ -5,6 +5,8 @@ import { IdeaService } from './services/ideaService';
 import dotenv from 'dotenv';
 import projectRoutes from './routes/projects'
 import docsRoutes from './routes/docs'
+import syncRoutes from './routes/sync'
+import { gitSyncService } from './services/gitSyncService'
 dotenv.config();
 
 const app = express();
@@ -34,6 +36,14 @@ app.post('/api/tasks', async (req: Request, res: Response) => {
   try {
     const task = req.body;
     await taskService.createTask(task);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'add',
+      entity: 'task',
+      title: task.title || 'New task'
+    });
+    
     res.status(201).json({ 
       success: true, 
       message: 'Task created',
@@ -55,6 +65,13 @@ app.put('/api/tasks/:id', async (req: Request, res: Response) => {
     
     await taskService.updateTask(taskId, updatedTask);
     
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'update',
+      entity: 'task',
+      title: updatedTask.title || taskId
+    });
+    
     res.json({ 
       success: true, 
       message: 'Task updated',
@@ -64,7 +81,7 @@ app.put('/api/tasks/:id', async (req: Request, res: Response) => {
     res.status(500).json({ 
       success: false, 
       message: 'Failed to update task',
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -73,6 +90,14 @@ app.delete('/api/tasks/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await taskService.deleteTask(id);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'delete',
+      entity: 'task',
+      title: id
+    });
+    
     res.status(200).json({ 
       success: true, 
       message: 'Task deleted',
@@ -104,6 +129,14 @@ app.post('/api/ideas', async (req: Request, res: Response) => {
   try {
     const idea = req.body;
     const newIdea = await ideaService.createIdea(idea);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'add',
+      entity: 'idea',
+      title: idea.title || 'New idea'
+    });
+    
     res.status(201).json({
       success: true,
       message: 'Idea created',
@@ -122,6 +155,14 @@ app.put('/api/ideas/reorder', async (req: Request, res: Response) => {
   try {
     const ideas = req.body;
     await ideaService.reorderIdeas(ideas);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'update',
+      entity: 'idea',
+      title: `Reordered ${ideas.length} ideas`
+    });
+    
     res.json({
       success: true,
       message: 'Ideas reordered'
@@ -140,6 +181,14 @@ app.put('/api/ideas/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const updates = req.body;
     await ideaService.updateIdea(id, updates);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'update',
+      entity: 'idea',
+      title: updates.title || id
+    });
+    
     res.json({
       success: true,
       message: 'Idea updated'
@@ -157,6 +206,14 @@ app.delete('/api/ideas/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await ideaService.deleteIdea(id);
+    
+    // Schedule Git commit
+    gitSyncService.scheduleCommit({
+      type: 'delete',
+      entity: 'idea',
+      title: id
+    });
+    
     res.json({
       success: true,
       message: 'Idea deleted',
@@ -173,6 +230,25 @@ app.delete('/api/ideas/:id', async (req: Request, res: Response) => {
 
 app.use('/api/projects', projectRoutes)
 app.use('/api/docs', docsRoutes)
+app.use('/api/sync', syncRoutes)
+
+// Initialize Git sync service
+gitSyncService.initialize().then((success: boolean) => {
+  if (success) {
+    console.log('Git sync service initialized');
+  } else {
+    console.log('Git sync service initialization failed - Git features disabled');
+  }
+});
+
+// Health check endpoint for connectivity detection
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.head('/api/health', (_req: Request, res: Response) => {
+  res.status(200).end();
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

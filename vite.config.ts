@@ -53,8 +53,78 @@ export default defineConfig({
       },
       workbox: {
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,json}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,json,woff,woff2}'],
+        // Skip external URLs in precache
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
+          // Local API - NetworkFirst with IndexedDB fallback
+          {
+            urlPattern: /^\/api\/tasks/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'tasks-api-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^\/api\/projects/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'projects-api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^\/api\/ideas/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ideas-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^\/api\/docs/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'docs-api-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 30 // 30 minutes
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          // Health check endpoint - always network
+          {
+            urlPattern: /^\/api\/health/i,
+            handler: 'NetworkOnly'
+          },
+          // Google Fonts - CacheFirst (unchanged)
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -83,27 +153,16 @@ export default defineConfig({
               }
             }
           },
+          // Images - CacheFirst
           {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'images-cache',
               expiration: {
-                maxEntries: 50,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
               }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/api\.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutes
-              },
-              networkTimeoutSeconds: 10
             }
           }
         ]

@@ -76,8 +76,8 @@ Once all stories in an Epic (e.g., Epic 1) are complete:
     *   Story 2.3: Drag and Drop Scheduling - PASS (88) ✅
     *   Story 2.4: Recurring Tasks and Templates - PASS (82) ✅
     *   Story 2.5: Quick Stats Widget - PASS (85) ✅
-*   **Current Epic**: Epic 3 (Mobile & Offline Excellence)
-    *   Story 3.1: Mobile-Optimized Layouts - Ready for Dev
-    *   Story 3.2: Offline Support and PWA - Ready for Dev
-    *   Story 3.3: Enhanced Git Sync - Ready for Dev
-*   **Next Story**: `docs/stories/3.1.mobile-optimized-layouts.md`
+*   **Completed Epic**: Epic 3 (Mobile & Offline Excellence) ✅
+    *   Story 3.1: Mobile-Optimized Layouts - PASS (82) ✅
+    *   Story 3.2: Offline Support and PWA - PASS (82) ✅
+    *   Story 3.3: Enhanced Git Sync - PASS (92) ✅ (improved with unit tests)
+*   **Next Step**: Begin Epic 4 (Analytics & Intelligence) or integration testing
