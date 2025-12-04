@@ -175,7 +175,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
   const fetchProgress = async () => {
     setIsProgressLoading(true)
     try {
-      const response = await fetch('http://localhost:3001/api/docs/progress')
+      const response = await fetch('/api/docs/progress')
       const data = await response.json()
       setProgressData(data)
     } catch (err) {
@@ -197,7 +197,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
     // Try completed path first, then pending
     const tryPath = async (path: string): Promise<boolean> => {
       try {
-        const response = await fetch(`http://localhost:3001/api/docs/content?path=${encodeURIComponent(path + '.md')}`)
+        const response = await fetch(`/api/docs/content?path=${encodeURIComponent(path + '.md')}`)
         if (response.ok) {
           setSelectedPath(path + '.md')
           return true
@@ -239,7 +239,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
 
   const fetchDocsTree = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/docs/tree')
+      const response = await fetch('/api/docs/tree')
       const data = await response.json()
       setDocsTree(data)
     } catch (err) {
@@ -252,7 +252,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch(`http://localhost:3001/api/docs/content?path=${encodeURIComponent(path)}`)
+      const response = await fetch(`/api/docs/content?path=${encodeURIComponent(path)}`)
       const data = await response.json()
       setContent(data.content)
     } catch (err) {

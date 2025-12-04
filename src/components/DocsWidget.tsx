@@ -16,7 +16,7 @@ function DocsWidget() {
   const fetchProgress = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:3001/api/docs/progress')
+      const response = await fetch('/api/docs/progress')
       const data = await response.json()
       setProgressData(data)
     } catch (err) {

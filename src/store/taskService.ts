@@ -1,7 +1,7 @@
 import { TaskType } from "@/types/task"
 import { fetchWithRetry, withRetry } from "@/services/retryService"
 
-const API_URL = 'http://localhost:3001/api'
+const API_URL = '/api'
 
 export const taskService = {
   /**
