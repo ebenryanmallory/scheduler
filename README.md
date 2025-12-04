@@ -36,18 +36,56 @@ src/
 
 1. Clone the repository:
 
-bash
+```bash
 git clone [your-repo-url]
+```
 
 2. Install dependencies:
 
-bash
+```bash
 npm install
+```
 
 3. Run the development server:
 
-bash
+```bash
 npm run dev
+```
+
+### HTTPS Setup (Optional but Recommended)
+
+The app supports HTTPS for local development, which is required for some PWA features. To enable it:
+
+1. **Install mkcert** (creates locally-trusted certificates):
+
+   ```bash
+   # macOS
+   brew install mkcert
+   
+   # Windows (with Chocolatey)
+   choco install mkcert
+   
+   # Linux (Debian/Ubuntu)
+   sudo apt install mkcert
+   ```
+
+2. **Install the local Certificate Authority:**
+
+   ```bash
+   mkcert -install
+   ```
+
+3. **Generate certificates for localhost:**
+
+   ```bash
+   mkdir -p .cert
+   cd .cert
+   mkcert -key-file key.pem -cert-file cert.pem localhost 127.0.0.1 ::1
+   ```
+
+4. **Restart the dev servers** - they will automatically detect the certificates and enable HTTPS.
+
+> **Note:** Without HTTPS setup, the app will fall back to HTTP automatically.
 
 ## Storage and Synchronization
 

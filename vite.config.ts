@@ -1,8 +1,20 @@
 import path from "path"
+import { fileURLToPath } from 'url'
+import { dirname } from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import fs from 'fs'
+
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Check if SSL certificates are available
+const keyPath = path.resolve(__dirname, './.cert/key.pem');
+const certPath = path.resolve(__dirname, './.cert/cert.pem');
+const hasCertificates = fs.existsSync(keyPath) && fs.existsSync(certPath);
+const serverProtocol = hasCertificates ? 'https' : 'http';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -177,15 +189,23 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: `${serverProtocol}://localhost:3001`,
         changeOrigin: true,
+        secure: false, // Allow self-signed certificates
       },
     },
-    https: {
-      // For development HTTPS support
-      key: fs.readFileSync(path.resolve(__dirname, './.cert/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, './.cert/cert.pem')),
-    },
+    https: hasCertificates ? (() => {
+      // Load SSL certificates from .cert folder
+      try {
+        return {
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+        };
+      } catch (error) {
+        console.warn('Could not load SSL certificates for Vite dev server:', error);
+        return undefined;
+      }
+    })() : undefined,
     headers: {
       'Content-Security-Policy': `
         default-src 'self';

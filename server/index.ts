@@ -1,5 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { TaskService } from './services/taskService';
 import { IdeaService } from './services/ideaService';
 import dotenv from 'dotenv';
@@ -8,6 +14,10 @@ import docsRoutes from './routes/docs'
 import syncRoutes from './routes/sync'
 import { gitSyncService } from './services/gitSyncService'
 dotenv.config();
+
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const taskService = new TaskService();
@@ -251,6 +261,40 @@ app.head('/api/health', (_req: Request, res: Response) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Task server running on port ${PORT}`);
-}); 
+
+// Try to load SSL certificates from .cert folder
+const certPath = path.resolve(__dirname, '../.cert');
+const keyPath = path.join(certPath, 'key.pem');
+const certFilePath = path.join(certPath, 'cert.pem');
+
+let useHttps = false;
+let httpsOptions: { key: Buffer; cert: Buffer } | null = null;
+
+try {
+  if (fs.existsSync(keyPath) && fs.existsSync(certFilePath)) {
+    httpsOptions = {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certFilePath),
+    };
+    useHttps = true;
+    console.log('SSL certificates found - HTTPS enabled');
+  } else {
+    console.log('SSL certificates not found - using HTTP');
+  }
+} catch (error) {
+  console.warn('Error loading SSL certificates:', error instanceof Error ? error.message : 'Unknown error');
+  console.log('Falling back to HTTP');
+}
+
+// Start server with HTTPS if certificates are available, otherwise use HTTP
+if (useHttps && httpsOptions) {
+  const server = https.createServer(httpsOptions, app);
+  server.listen(PORT, () => {
+    console.log(`Task server running on https://localhost:${PORT}`);
+  });
+} else {
+  const server = http.createServer(app);
+  server.listen(PORT, () => {
+    console.log(`Task server running on http://localhost:${PORT}`);
+  });
+} 
