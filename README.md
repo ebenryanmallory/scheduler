@@ -34,11 +34,7 @@ src/
 
 ## Getting Started
 
-1. Clone the repository:
-
-```bash
-git clone [your-repo-url]
-```
+1. Clone the repository
 
 2. Install dependencies:
 
