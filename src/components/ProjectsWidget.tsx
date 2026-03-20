@@ -99,25 +99,35 @@ function ProjectsWidget() {
         </Button>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={displayProjects}
-          strategy={verticalListSortingStrategy}
+      {displayProjects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-6 text-center gap-3">
+          <p className="text-sm text-muted-foreground">No projects yet.</p>
+          <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Create your first project
+          </Button>
+        </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <div className="space-y-2">
-            {displayProjects.map((project) => (
-              <SortableProject
-                key={project.id}
-                {...project}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={displayProjects}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {displayProjects.map((project) => (
+                <SortableProject
+                  key={project.id}
+                  {...project}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
       
       <CreateProjectDialog 
         open={isDialogOpen} 

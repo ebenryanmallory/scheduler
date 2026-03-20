@@ -38,3 +38,9 @@ dist-ssr
 
 # Local Claude agents
 .claude/
+
+# Wrangler local state
+.wrangler/
+
+# Migration output
+seed.sql

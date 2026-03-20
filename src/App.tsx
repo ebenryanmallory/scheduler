@@ -1,4 +1,6 @@
 import { useMemo, useCallback, useEffect } from 'react'
+import { SignedIn, SignedOut, SignIn, useAuth } from '@clerk/clerk-react'
+import { setTokenProvider } from './services/authFetch'
 import ScheduleView from './components/ScheduleView'
 import CreateTaskDialog from './components/modals/CreateTaskDialog'
 import { NotificationSettings } from './components/NotificationSettings'
@@ -30,10 +32,14 @@ import { Menu } from 'lucide-react'
 import { OfflineBadge, OfflineIndicator } from './components/OfflineIndicator'
 import { InstallPrompt } from './components/InstallPrompt'
 import { initializeOfflineDb } from './services/offlineDb'
-import { SyncStatusBadge } from './components/SyncStatusIndicator'
 
 function AppContent() {
-  const { 
+  const { getToken } = useAuth()
+
+  // Register Clerk token provider synchronously so it's available before first API call
+  setTokenProvider(() => getToken())
+
+  const {
     selectedDate,
     isCreateDialogOpen,
     selectedTimeBlock,
@@ -155,9 +161,6 @@ function AppContent() {
               {greeting}
             </h1>
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-              {/* Git sync status */}
-              <SyncStatusBadge />
-              
               {/* Offline status badge */}
               <OfflineBadge />
               
@@ -266,7 +269,14 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="system">
-        <AppContent />
+        <SignedIn>
+          <AppContent />
+        </SignedIn>
+        <SignedOut>
+          <div className="min-h-screen flex items-center justify-center bg-background">
+            <SignIn />
+          </div>
+        </SignedOut>
       </ThemeProvider>
     </ErrorBoundary>
   )

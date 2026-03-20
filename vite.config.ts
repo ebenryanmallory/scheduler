@@ -18,6 +18,8 @@ const serverProtocol = hasCertificates ? 'https' : 'http';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Expose VITE_* env vars to the frontend bundle
+  envPrefix: 'VITE_',
   plugins: [
     react(),
     VitePWA({
@@ -189,9 +191,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: `${serverProtocol}://localhost:3001`,
+        target: 'http://localhost:8787',
         changeOrigin: true,
-        secure: false, // Allow self-signed certificates
+        secure: false,
       },
     },
     https: hasCertificates ? (() => {

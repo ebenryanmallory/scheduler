@@ -73,7 +73,19 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       const projects = await projectService.fetchProjects()
-      set({ projects, isLoading: false })
+      if (projects.length === 0) {
+        // New user — seed a default project
+        const defaultId = 'my-first-project'
+        const defaultProject: Partial<Project> = {
+          title: 'My First Project',
+          color: 'bg-purple-100 text-purple-800',
+          order: 0,
+        }
+        const created = await projectService.createProject(defaultId, defaultProject)
+        set({ projects: [created], isLoading: false })
+      } else {
+        set({ projects, isLoading: false })
+      }
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false })
     }

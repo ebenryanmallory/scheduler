@@ -1,0 +1,23 @@
+name = "scheduler"
+main = "worker/src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "scheduler-db"
+database_id = "ed8587ca-6351-4bb6-8c22-7f4b0d67826a"
+
+[[r2_buckets]]
+binding = "DOCS_BUCKET"
+bucket_name = "scheduler-docs"
+
+[vars]
+CLERK_PUBLISHABLE_KEY = "pk_test_ZnJlZS1tYWNhdy01OS5jbGVyay5hY2NvdW50cy5kZXYk"
+
+# Set secret via: wrangler secret put CLERK_SECRET_KEY

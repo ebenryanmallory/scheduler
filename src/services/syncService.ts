@@ -2,6 +2,7 @@ import { offlineQueue } from './offlineQueue'
 import { offlineStorage } from './offlineStorage'
 import { QueuedOperation } from './offlineDb'
 import type { TaskType } from '@/types/task'
+import { authFetch } from './authFetch'
 
 const API_URL = '/api'
 
@@ -149,7 +150,7 @@ export const syncService = {
 
     switch (type) {
       case 'create':
-        response = await fetch(`${API_URL}/tasks`, {
+        response = await authFetch(`${API_URL}/tasks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -177,7 +178,7 @@ export const syncService = {
           }
         }
 
-        response = await fetch(`${API_URL}/tasks/${taskId}`, {
+        response = await authFetch(`${API_URL}/tasks/${taskId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -185,7 +186,7 @@ export const syncService = {
         break
 
       case 'delete':
-        response = await fetch(`${API_URL}/tasks/${taskId}`, {
+        response = await authFetch(`${API_URL}/tasks/${taskId}`, {
           method: 'DELETE'
         })
         break
@@ -214,7 +215,7 @@ export const syncService = {
    */
   async fetchServerTask(taskId: string): Promise<TaskType | null> {
     try {
-      const response = await fetch(`${API_URL}/tasks/${taskId}`)
+      const response = await authFetch(`${API_URL}/tasks/${taskId}`)
       if (response.ok) {
         return response.json()
       }
@@ -236,21 +237,21 @@ export const syncService = {
 
     switch (type) {
       case 'create':
-        response = await fetch(`${API_URL}/projects`, {
+        response = await authFetch(`${API_URL}/projects`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
         break
       case 'update':
-        response = await fetch(`${API_URL}/projects/${projectId}`, {
+        response = await authFetch(`${API_URL}/projects/${projectId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
         break
       case 'delete':
-        response = await fetch(`${API_URL}/projects/${projectId}`, {
+        response = await authFetch(`${API_URL}/projects/${projectId}`, {
           method: 'DELETE'
         })
         break
@@ -273,21 +274,21 @@ export const syncService = {
 
     switch (type) {
       case 'create':
-        response = await fetch(`${API_URL}/ideas`, {
+        response = await authFetch(`${API_URL}/ideas`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
         break
       case 'update':
-        response = await fetch(`${API_URL}/ideas/${ideaId}`, {
+        response = await authFetch(`${API_URL}/ideas/${ideaId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         })
         break
       case 'delete':
-        response = await fetch(`${API_URL}/ideas/${ideaId}`, {
+        response = await authFetch(`${API_URL}/ideas/${ideaId}`, {
           method: 'DELETE'
         })
         break
@@ -321,7 +322,7 @@ export const syncService = {
 
       if (resolution === 'local') {
         // Force push local changes
-        const response = await fetch(`${API_URL}/${operation.entity}s/${operation.entityId}`, {
+        const response = await authFetch(`${API_URL}/${operation.entity}s/${operation.entityId}`, {
           method: 'PUT',
           headers: { 
             'Content-Type': 'application/json',
@@ -339,7 +340,7 @@ export const syncService = {
 
       if (resolution === 'merge' && mergedData) {
         // Push merged data
-        const response = await fetch(`${API_URL}/${operation.entity}s/${operation.entityId}`, {
+        const response = await authFetch(`${API_URL}/${operation.entity}s/${operation.entityId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(mergedData)
