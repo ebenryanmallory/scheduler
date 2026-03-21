@@ -25,15 +25,8 @@ export function useMediaQuery(query: string): boolean {
       setMatches(event.matches)
     }
 
-    // Modern API
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handler)
-      return () => mediaQuery.removeEventListener('change', handler)
-    } else {
-      // Fallback for older browsers
-      mediaQuery.addListener(handler)
-      return () => mediaQuery.removeListener(handler)
-    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
   }, [query])
 
   return matches

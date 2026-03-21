@@ -87,8 +87,10 @@ export function SwipeableViews({
     onSwiped: handleSwiped,
     trackMouse: false,
     trackTouch: true,
-    delta: 10,
-    preventScrollOnSwipe: true,
+    // Larger delta prevents accidental swipe triggers during vertical scroll
+    delta: 20,
+    // Allow vertical scroll to work naturally; rely on velocity/distance thresholds instead
+    preventScrollOnSwipe: false,
   })
 
   // On desktop, just render current view

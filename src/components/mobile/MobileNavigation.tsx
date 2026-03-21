@@ -18,6 +18,11 @@ import { useTheme } from '@/context/ThemeContext'
 
 export type MobileView = 'schedule' | 'tasks' | 'analytics' | 'more'
 
+function scrollToCard(id: string) {
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 interface MobileNavigationProps {
   currentView: MobileView
   onViewChange: (view: MobileView) => void
@@ -36,6 +41,12 @@ const navItems: NavItem[] = [
   { id: 'analytics', label: 'Stats', icon: <BarChart3 className="h-5 w-5" /> },
   { id: 'more', label: 'More', icon: <Menu className="h-5 w-5" /> },
 ]
+
+const navScrollTargets: Record<string, string> = {
+  schedule: 'card-schedule',
+  tasks: 'card-tasks',
+  analytics: 'card-analytics',
+}
 
 /**
  * Mobile bottom navigation bar
@@ -61,7 +72,13 @@ export function MobileBottomNav({ currentView, onViewChange, className }: Mobile
         {navItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => onViewChange(item.id)}
+            onClick={() => {
+              const target = navScrollTargets[item.id]
+              if (target) {
+                scrollToCard(target)
+              }
+              onViewChange(item.id)
+            }}
             className={cn(
               'flex flex-col items-center justify-center py-2 px-4 flex-1',
               // Minimum 44px touch target
@@ -88,20 +105,21 @@ export function MobileBottomNav({ currentView, onViewChange, className }: Mobile
 interface HamburgerMenuProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onScrollTo?: (sectionId: string) => void
+  onOpenNotifications?: () => void
 }
 
-export function HamburgerMenu({ open, onOpenChange }: HamburgerMenuProps) {
+export function HamburgerMenu({ open, onOpenChange, onScrollTo, onOpenNotifications }: HamburgerMenuProps) {
   const { theme, setTheme } = useTheme()
 
-  // TODO: Wire up navigation actions to scroll to respective sections
   const menuItems = [
-    { icon: <Lightbulb className="h-5 w-5" />, label: 'Ideas', action: () => { /* TODO: Scroll to Ideas section */ } },
-    { icon: <FolderKanban className="h-5 w-5" />, label: 'Projects', action: () => { /* TODO: Scroll to Projects section */ } },
-    { icon: <FileText className="h-5 w-5" />, label: 'Docs', action: () => { /* TODO: Scroll to Docs section */ } },
-    { icon: <Bell className="h-5 w-5" />, label: 'Notifications', action: () => { /* TODO: Open notification settings */ } },
-    { 
-      icon: theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />, 
-      label: theme === 'dark' ? 'Light Mode' : 'Dark Mode', 
+    { icon: <Lightbulb className="h-5 w-5" />, label: 'Ideas', action: () => onScrollTo?.('card-ideas') },
+    { icon: <FolderKanban className="h-5 w-5" />, label: 'Projects', action: () => onScrollTo?.('card-projects') },
+    { icon: <FileText className="h-5 w-5" />, label: 'Docs', action: () => onScrollTo?.('card-docs') },
+    { icon: <Bell className="h-5 w-5" />, label: 'Notifications', action: () => onOpenNotifications?.() },
+    {
+      icon: theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />,
+      label: theme === 'dark' ? 'Light Mode' : 'Dark Mode',
       action: () => setTheme(theme === 'dark' ? 'light' : 'dark')
     },
   ]
@@ -170,7 +188,7 @@ export function HamburgerMenu({ open, onOpenChange }: HamburgerMenuProps) {
 export function useMobileNavigation() {
   const [currentView, setCurrentView] = useState<MobileView>('schedule')
   const [menuOpen, setMenuOpen] = useState(false)
-  
+
   const handleViewChange = useCallback((view: MobileView) => {
     if (view === 'more') {
       setMenuOpen(true)

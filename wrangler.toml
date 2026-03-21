@@ -19,5 +19,3 @@ bucket_name = "scheduler-docs"
 
 [vars]
 CLERK_PUBLISHABLE_KEY = "pk_test_ZnJlZS1tYWNhdy01OS5jbGVyay5hY2NvdW50cy5kZXYk"
-
-# Set secret via: wrangler secret put CLERK_SECRET_KEY

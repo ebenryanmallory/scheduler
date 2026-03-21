@@ -139,7 +139,7 @@ export function NestedTimeBlocks({
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+                  className="h-7 min-h-[44px] sm:min-h-0 px-2 text-xs hover:bg-primary/10 hover:text-primary"
                   onClick={(e) => {
                     e.stopPropagation()
                     const timeBlock = timeBlocks.find(b => b?.time === currentTime)

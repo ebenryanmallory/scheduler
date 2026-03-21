@@ -54,8 +54,8 @@ export async function createTask(db: D1Database, userId: string, task: Task): Pr
       task.priority ?? 'medium',
       JSON.stringify(task.tags ?? []),
       task.estimatedDuration ?? null,
-      JSON.stringify(task.timeTracking ?? {}),
-      JSON.stringify(task.recurrence ?? {})
+      task.timeTracking ? JSON.stringify(task.timeTracking) : null,
+      task.recurrence ? JSON.stringify(task.recurrence) : null
     )
     .run()
 }

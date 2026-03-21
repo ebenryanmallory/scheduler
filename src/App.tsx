@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from 'react'
+import { useMemo, useCallback, useEffect, useState } from 'react'
 import { SignedIn, SignedOut, SignIn, useAuth } from '@clerk/clerk-react'
 import { setTokenProvider } from './services/authFetch'
 import ScheduleView from './components/ScheduleView'
@@ -17,12 +17,10 @@ import { Toaster, toast } from 'react-hot-toast';
 import { useTaskStore } from './store/taskStore'
 import { errorService } from './services/errorService'
 import { useIsMobile } from './hooks/useMediaQuery'
-import { 
-  MobileBottomNav, 
-  HamburgerMenu, 
+import {
+  MobileBottomNav,
+  HamburgerMenu,
   useMobileNavigation,
-  SwipeableViews,
-  MobileView,
   CollapsibleSection
 } from './components/mobile'
 import IdeasWidget from './components/IdeasWidget'
@@ -60,6 +58,14 @@ function AppContent() {
   // Mobile navigation
   const { currentView, menuOpen, setMenuOpen, handleViewChange } = useMobileNavigation()
   const isMobile = useIsMobile()
+  const [notifOpen, setNotifOpen] = useState(false)
+
+  const handleScrollToSection = useCallback((sectionId: string) => {
+    const el = document.getElementById(sectionId)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [])
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
@@ -88,66 +94,6 @@ function AppContent() {
     }
   };
 
-  // Map mobile views to swipeable indices
-  const viewToIndex: Record<MobileView, number> = {
-    'schedule': 0,
-    'tasks': 0,  // Same view
-    'analytics': 1,
-    'more': 0
-  }
-
-  const handleSwipeIndexChange = useCallback((index: number) => {
-    const indexToView: MobileView[] = ['schedule', 'analytics']
-    handleViewChange(indexToView[index] || 'schedule')
-  }, [handleViewChange])
-
-  // Mobile content views
-  const renderMobileContent = () => {
-    if (currentView === 'analytics') {
-      return (
-        <div className="space-y-4">
-          <QuickStatsWidget />
-          <TimeAnalyticsWidget />
-        </div>
-      )
-    }
-
-    // Schedule/Tasks view (default)
-    return (
-      <div className="space-y-4">
-        <ScheduleView 
-          selectedDate={selectedDate}
-          onDateSelect={(date: Date) => setSelectedDate(date)}
-          onTimeBlockSelect={setSelectedTimeBlock}
-        />
-        
-        {/* Collapsible widgets on mobile */}
-        <CollapsibleSection 
-          title="Ideas" 
-          storageKey="mobile-ideas"
-          autoCollapseOnMobile
-        >
-          <IdeasWidget />
-        </CollapsibleSection>
-        
-        <CollapsibleSection 
-          title="Projects" 
-          storageKey="mobile-projects"
-          autoCollapseOnMobile
-        >
-          <ProjectsWidget />
-        </CollapsibleSection>
-        
-        <CollapsibleSection 
-          title="Docs" 
-          storageKey="mobile-docs"
-          autoCollapseOnMobile
-        >
-          <DocsWidget />
-        </CollapsibleSection>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -190,23 +136,33 @@ function AppContent() {
       {/* Main content - responsive */}
       <main className="mx-auto max-w-7xl px-3 sm:px-4 md:px-8 py-3 sm:py-4 md:py-8">
         {isMobile ? (
-          // Mobile: swipeable views
-          <SwipeableViews
-            currentIndex={viewToIndex[currentView]}
-            onIndexChange={handleSwipeIndexChange}
-            className="min-h-[calc(100vh-180px)]"
-          >
-            {/* View 1: Schedule + Tasks */}
-            <div className="px-1">
-              {renderMobileContent()}
+          // Mobile: vertically stacked cards, each with a stable scroll target
+          <div className="space-y-4 pb-24">
+            <div id="card-schedule">
+              <ScheduleView
+                selectedDate={selectedDate}
+                onDateSelect={(date: Date) => setSelectedDate(date)}
+                onTimeBlockSelect={setSelectedTimeBlock}
+              />
             </div>
-            
-            {/* View 2: Analytics */}
-            <div className="px-1 space-y-4">
+
+            <div id="card-analytics" className="space-y-4">
               <QuickStatsWidget />
               <TimeAnalyticsWidget />
             </div>
-          </SwipeableViews>
+
+            <CollapsibleSection id="card-ideas" title="Ideas" storageKey="mobile-ideas" autoCollapseOnMobile>
+              <IdeasWidget />
+            </CollapsibleSection>
+
+            <CollapsibleSection id="card-projects" title="Projects" storageKey="mobile-projects" autoCollapseOnMobile>
+              <ProjectsWidget />
+            </CollapsibleSection>
+
+            <CollapsibleSection id="card-docs" title="Docs" storageKey="mobile-docs" autoCollapseOnMobile>
+              <DocsWidget />
+            </CollapsibleSection>
+          </div>
         ) : (
           // Desktop: standard layout
           <div className="mx-auto max-w-7xl">
@@ -244,7 +200,14 @@ function AppContent() {
           <HamburgerMenu
             open={menuOpen}
             onOpenChange={setMenuOpen}
+            onScrollTo={handleScrollToSection}
+            onOpenNotifications={() => {
+              setMenuOpen(false)
+              setNotifOpen(true)
+            }}
           />
+          {/* Notification settings accessible from mobile menu (no trigger button — opened programmatically) */}
+          <NotificationSettings open={notifOpen} onOpenChange={setNotifOpen} />
         </>
       )}
 

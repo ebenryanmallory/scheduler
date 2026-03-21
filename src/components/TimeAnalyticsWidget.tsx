@@ -8,6 +8,8 @@ import { Button } from './ui/button';
 import { useTimeAnalytics, formatDuration, formatTimeHHMM } from '@/hooks/useTimeAnalytics';
 import { useTimerStore } from '@/store/timerStore';
 import TimeHistoryModal from './modals/TimeHistoryModal';
+import { SwipeableViews, SwipeIndicator } from './mobile/SwipeableViews';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 const COLLAPSE_STORAGE_KEY = 'scheduler_analytics_collapsed';
 
@@ -45,9 +47,11 @@ function TimeAnalyticsWidget() {
       return true;
     }
   });
-  
+
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
   const { activeTaskId } = useTimerStore();
+  const isMobile = useIsMobile();
   
   const {
     dailyStats,
@@ -104,7 +108,7 @@ function TimeAnalyticsWidget() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0"
+              className="h-7 w-7 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 p-0"
               onClick={(e) => {
                 e.stopPropagation();
                 refresh();
@@ -123,148 +127,144 @@ function TimeAnalyticsWidget() {
 
         {/* Content */}
         {!isCollapsed && (
-          <div className="p-4 pt-0 space-y-4">
-            {/* Daily Stats Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* Today's Time */}
-              <div className="rounded-lg p-3 bg-muted/50">
-                <div className="text-xs text-muted-foreground mb-1">Today</div>
-                <div className="text-xl font-semibold tabular-nums">
-                  {formatTimeHHMM(dailyStats.totalTrackedMs)}
+          <div className="p-4 pt-0 space-y-3">
+            <SwipeableViews
+              currentIndex={slideIndex}
+              onIndexChange={setSlideIndex}
+              disabled={!isMobile}
+            >
+              {/* Slide 1: Today's stats */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg p-3 bg-muted/50">
+                  <div className="text-xs text-muted-foreground mb-1">Today</div>
+                  <div className="text-xl font-semibold tabular-nums">
+                    {formatTimeHHMM(dailyStats.totalTrackedMs)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {dailyStats.taskCount} task{dailyStats.taskCount !== 1 ? 's' : ''}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {dailyStats.taskCount} task{dailyStats.taskCount !== 1 ? 's' : ''}
-                </div>
-              </div>
 
-              {/* Variance */}
-              <div className="rounded-lg p-3 bg-muted/50">
-                <div className="text-xs text-muted-foreground mb-1">Variance</div>
-                <div
-                  className={`text-xl font-semibold tabular-nums ${getVarianceColor(
-                    dailyStats.variance,
-                    dailyStats.estimatedMs
-                  )}`}
-                >
-                  {dailyStats.variance >= 0 ? '+' : ''}
-                  {formatDuration(dailyStats.variance)}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Est: {formatDuration(dailyStats.estimatedMs)}
-                </div>
-              </div>
-
-              {/* Accuracy */}
-              <div className="rounded-lg p-3 bg-muted/50">
-                <div className="text-xs text-muted-foreground mb-1">Accuracy</div>
-                <div
-                  className={`text-xl font-semibold tabular-nums ${getAccuracyColor(
-                    dailyStats.accuracy
-                  )}`}
-                >
-                  {dailyStats.accuracy}%
-                </div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                <div className="rounded-lg p-3 bg-muted/50">
+                  <div className="text-xs text-muted-foreground mb-1">Variance</div>
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      dailyStats.accuracy >= 80 
-                        ? 'bg-emerald-500' 
-                        : dailyStats.accuracy >= 60 
-                          ? 'bg-amber-500' 
-                          : 'bg-red-500'
-                    }`}
-                    style={{ width: `${Math.min(dailyStats.accuracy, 100)}%` }}
-                  />
+                    className={`text-xl font-semibold tabular-nums ${getVarianceColor(
+                      dailyStats.variance,
+                      dailyStats.estimatedMs
+                    )}`}
+                  >
+                    {dailyStats.variance >= 0 ? '+' : ''}
+                    {formatDuration(dailyStats.variance)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Est: {formatDuration(dailyStats.estimatedMs)}
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Project Breakdown */}
-            {displayProjects.length > 0 && (
-              <div>
-                <h4 className="text-sm text-muted-foreground mb-2">
-                  By Project
-                </h4>
-                <div className="space-y-2">
-                  {displayProjects.map((project) => (
-                    <div key={project.projectName} className="flex items-center gap-2">
-                      <span className="flex-1 text-sm truncate">
-                        {project.projectName}
-                      </span>
-                      <span className="text-sm text-muted-foreground tabular-nums">
-                        {formatDuration(project.trackedMs)}
-                      </span>
-                      <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-foreground/30 rounded-full"
-                          style={{ width: `${project.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  {overflowCount > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      +{overflowCount} more
-                    </p>
-                  )}
+                <div className="rounded-lg p-3 bg-muted/50">
+                  <div className="text-xs text-muted-foreground mb-1">Accuracy</div>
+                  <div
+                    className={`text-xl font-semibold tabular-nums ${getAccuracyColor(
+                      dailyStats.accuracy
+                    )}`}
+                  >
+                    {dailyStats.accuracy}%
+                  </div>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        dailyStats.accuracy >= 80
+                          ? 'bg-emerald-500'
+                          : dailyStats.accuracy >= 60
+                            ? 'bg-amber-500'
+                            : 'bg-red-500'
+                      }`}
+                      style={{ width: `${Math.min(dailyStats.accuracy, 100)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Slide 2: By Project */}
+              <div className="min-h-[88px]">
+                {displayProjects.length > 0 ? (
+                  <div className="space-y-2">
+                    <h4 className="text-xs text-muted-foreground uppercase tracking-wide">By Project</h4>
+                    {displayProjects.map((project) => (
+                      <div key={project.projectName} className="flex items-center gap-2">
+                        <span className="flex-1 text-sm truncate">{project.projectName}</span>
+                        <span className="text-sm text-muted-foreground tabular-nums">
+                          {formatDuration(project.trackedMs)}
+                        </span>
+                        <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-foreground/30 rounded-full"
+                            style={{ width: `${project.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {overflowCount > 0 && (
+                      <p className="text-xs text-muted-foreground">+{overflowCount} more</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No project data yet.</p>
+                )}
+              </div>
+
+              {/* Slide 3: This Week */}
+              <div>
+                <h4 className="text-xs text-muted-foreground uppercase tracking-wide mb-2">This Week</h4>
+                <div className="flex items-end gap-1 h-16">
+                  {weeklyHistory.map((day, index) => {
+                    const trackedHeight = (day.trackedMs / maxWeeklyMs) * 100;
+                    const estimatedHeight = (day.estimatedMs / maxWeeklyMs) * 100;
+                    const isToday = index === weeklyHistory.length - 1;
+
+                    return (
+                      <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="relative w-full h-12 flex items-end justify-center gap-0.5">
+                          <div
+                            className="w-2 bg-muted rounded-t"
+                            style={{ height: `${Math.max(estimatedHeight, 2)}%` }}
+                            title={`Estimated: ${formatDuration(day.estimatedMs)}`}
+                          />
+                          <div
+                            className={`w-2 rounded-t ${isToday ? 'bg-foreground/50' : 'bg-foreground/30'}`}
+                            style={{ height: `${Math.max(trackedHeight, day.trackedMs > 0 ? 2 : 0)}%` }}
+                            title={`Tracked: ${formatDuration(day.trackedMs)}`}
+                          />
+                        </div>
+                        <span className={`text-xs ${isToday ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+                          {day.dayLabel}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded bg-foreground/40" />
+                    <span>Tracked</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded bg-muted" />
+                    <span>Estimated</span>
+                  </div>
+                </div>
+              </div>
+            </SwipeableViews>
+
+            {isMobile && (
+              <SwipeIndicator
+                totalViews={3}
+                currentIndex={slideIndex}
+                onDotClick={setSlideIndex}
+                className="py-1"
+              />
             )}
 
-            {/* Weekly History Chart */}
-            <div>
-              <h4 className="text-sm text-muted-foreground mb-2">
-                This Week
-              </h4>
-              <div className="flex items-end gap-1 h-16">
-                {weeklyHistory.map((day, index) => {
-                  const trackedHeight = (day.trackedMs / maxWeeklyMs) * 100;
-                  const estimatedHeight = (day.estimatedMs / maxWeeklyMs) * 100;
-                  const isToday = index === weeklyHistory.length - 1;
-
-                  return (
-                    <div
-                      key={day.date}
-                      className="flex-1 flex flex-col items-center gap-1 group"
-                    >
-                      <div className="relative w-full h-12 flex items-end justify-center gap-0.5">
-                        <div
-                          className="w-2 bg-muted rounded-t"
-                          style={{ height: `${Math.max(estimatedHeight, 2)}%` }}
-                          title={`Estimated: ${formatDuration(day.estimatedMs)}`}
-                        />
-                        <div
-                          className={`w-2 rounded-t ${
-                            isToday ? 'bg-foreground/50' : 'bg-foreground/30'
-                          }`}
-                          style={{ height: `${Math.max(trackedHeight, day.trackedMs > 0 ? 2 : 0)}%` }}
-                          title={`Tracked: ${formatDuration(day.trackedMs)}`}
-                        />
-                      </div>
-                      <span
-                        className={`text-xs ${
-                          isToday ? 'font-medium text-foreground' : 'text-muted-foreground'
-                        }`}
-                      >
-                        {day.dayLabel}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded bg-foreground/40" />
-                  <span>Tracked</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded bg-muted" />
-                  <span>Estimated</span>
-                </div>
-              </div>
-            </div>
-
-            {/* View Details Link */}
             <Button
               variant="outline"
               onClick={() => setIsHistoryOpen(true)}

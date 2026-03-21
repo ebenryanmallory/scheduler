@@ -206,6 +206,28 @@ html, body {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
+
+  /* Reduce header padding so content isn't pushed too far down */
+  header {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  /* Shrink bottom nav height to reclaim vertical space */
+  nav[aria-label="Main navigation"] {
+    min-height: 44px;
+  }
+
+  nav[aria-label="Main navigation"] button {
+    min-height: 44px;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Add extra bottom padding to main content to clear the shorter nav */
+  main {
+    padding-bottom: 52px !important;
+  }
 }
 
 /* Hide scrollbar on mobile for cleaner look */

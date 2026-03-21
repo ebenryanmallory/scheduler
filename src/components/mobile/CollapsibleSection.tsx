@@ -13,6 +13,8 @@ interface CollapsibleSectionProps {
   onToggle?: (isOpen: boolean) => void
   /** Auto-collapse on mobile - useful for less important sections */
   autoCollapseOnMobile?: boolean
+  /** HTML id for the outer wrapper, used for scroll-to targeting */
+  id?: string
 }
 
 /**
@@ -29,6 +31,7 @@ export function CollapsibleSection({
   headerClassName,
   onToggle,
   autoCollapseOnMobile = false,
+  id,
 }: CollapsibleSectionProps) {
   // Initialize from localStorage if available
   const getInitialState = () => {
@@ -79,7 +82,7 @@ export function CollapsibleSection({
   }
 
   return (
-    <div className={cn('rounded-lg border bg-card', className)}>
+    <div id={id} className={cn('rounded-lg border bg-card', className)}>
       <button
         onClick={toggleOpen}
         className={cn(

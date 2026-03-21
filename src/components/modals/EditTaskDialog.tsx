@@ -215,7 +215,7 @@ export function EditTaskDialog({
           )}
 
           {/* Time Tracking History Display */}
-          {task.timeTracking && task.timeTracking.history.length > 0 && (
+          {task.timeTracking && task.timeTracking.history && task.timeTracking.history.length > 0 && (
             <div className="text-xs text-muted-foreground space-y-1">
               <Label className="text-xs">Time Tracking History</Label>
               <div className="max-h-24 overflow-y-auto space-y-1 p-2 bg-muted/50 rounded">

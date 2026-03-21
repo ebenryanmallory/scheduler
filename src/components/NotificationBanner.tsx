@@ -104,7 +104,7 @@ export function NotificationBanner() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-6 w-6 shrink-0"
+        className="h-6 w-6 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 shrink-0"
         onClick={handleDismiss}
         aria-label="Dismiss notification banner"
       >

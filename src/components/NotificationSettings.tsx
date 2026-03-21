@@ -25,11 +25,20 @@ import {
   NOTIFICATION_TIMING_OPTIONS,
 } from '@/store/settingsStore';
 
-export function NotificationSettings() {
+interface NotificationSettingsProps {
+  /** Controlled open state — when provided, the trigger button is hidden */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function NotificationSettings({ open: controlledOpen, onOpenChange }: NotificationSettingsProps = {}) {
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermissionStatus>(
     notificationService.getPermissionStatus()
   );
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+  const setIsOpen = isControlled ? (onOpenChange ?? (() => {})) : setInternalOpen
 
   const {
     notifications,
@@ -64,23 +73,25 @@ export function NotificationSettings() {
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notification settings"
-        >
-          {notifications.enabled && isPermissionGranted ? (
-            <Bell className="h-5 w-5" />
-          ) : (
-            <BellOff className="h-5 w-5 text-muted-foreground" />
-          )}
-          {isPermissionDenied && (
-            <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
-          )}
-        </Button>
-      </PopoverTrigger>
+      {!isControlled && (
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            aria-label="Notification settings"
+          >
+            {notifications.enabled && isPermissionGranted ? (
+              <Bell className="h-5 w-5" />
+            ) : (
+              <BellOff className="h-5 w-5 text-muted-foreground" />
+            )}
+            {isPermissionDenied && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-destructive rounded-full" />
+            )}
+          </Button>
+        </PopoverTrigger>
+      )}
       <PopoverContent className="w-80" align="end">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
