@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { GripVertical, Pencil, Trash2, Palette } from "lucide-react"
+import { GripVertical, Pencil, Trash2, Palette, MoreHorizontal } from "lucide-react"
 import { Project } from "@/types/project"
 import { useProjectStore } from "@/store/projectStore"
 import { useState } from "react"
@@ -22,6 +22,8 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedTitle, setEditedTitle] = useState(title)
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [showActions, setShowActions] = useState(false)
   
   const {
     attributes,
@@ -80,7 +82,7 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
         <span className="text-sm font-medium text-gray-700">{title}</span>
       )}
       <div className="flex items-center gap-2 text-gray-600">
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className={`flex items-center gap-1 transition-opacity ${showActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <button
             onClick={handleEdit}
             className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
@@ -93,15 +95,41 @@ export function SortableProject({ id, title, color }: SortableProjectProps) {
           >
             <Palette className="h-4 w-4" />
           </button>
-          <button
-            onClick={() => deleteProject(id)}
-            className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {confirmingDelete ? (
+            <>
+              <span className="text-xs text-gray-600 mr-1">Delete?</span>
+              <button
+                onClick={() => { deleteProject(id); setConfirmingDelete(false) }}
+                className="px-2 py-0.5 text-xs bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => { setConfirmingDelete(false); setShowActions(false) }}
+                className="px-2 py-0.5 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md transition-colors"
+              >
+                No
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setConfirmingDelete(true)}
+              className="p-1 hover:bg-gray-200/70 rounded-md transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
+        {/* Mobile toggle — hidden on desktop via md:hidden */}
         <button
-          className="cursor-grab active:cursor-grabbing"
+          onClick={() => { setShowActions(v => !v); setConfirmingDelete(false); setShowColorPicker(false) }}
+          className="md:hidden p-1 hover:bg-gray-200/70 rounded-md transition-colors"
+          aria-label={showActions ? 'Hide actions' : 'Show actions'}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+        <button
+          className="cursor-grab active:cursor-grabbing touch-none"
           {...attributes}
           {...listeners}
         >

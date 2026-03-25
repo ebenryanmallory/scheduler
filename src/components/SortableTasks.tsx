@@ -27,7 +27,7 @@ export function SortableTask({ showTimer = true, ...props }: SortableTaskProps) 
 
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-2">
-      <div {...attributes} {...listeners} className="cursor-grab">
+      <div {...attributes} {...listeners} className="cursor-grab touch-none">
         <GripVertical className="h-5 w-5 text-gray-400" />
       </div>
       <div className="flex-1">
