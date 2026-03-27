@@ -5,7 +5,6 @@ import {
   Flame,
 } from 'lucide-react';
 import { useQuickStats, getMotivationalMessage, getProgressColor, getScoreColor } from '@/hooks/useQuickStats';
-import { formatDuration } from '@/hooks/useTimeAnalytics';
 import toast from 'react-hot-toast';
 
 const COLLAPSE_STORAGE_KEY = 'scheduler_quickstats_collapsed';
@@ -28,7 +27,6 @@ function QuickStatsWidget() {
   const {
     dailyProgress,
     streak,
-    focusBreakdown,
     productivityScore,
     newMilestones,
   } = useQuickStats();
@@ -62,7 +60,6 @@ function QuickStatsWidget() {
     }
   }, [newMilestones]);
 
-  const focusPercentage = Math.round(focusBreakdown.ratio * 100);
   const { message, emoji } = getMotivationalMessage(productivityScore.score);
 
   return (
@@ -133,23 +130,6 @@ function QuickStatsWidget() {
               </div>
               <div className="text-xs text-muted-foreground mt-2">
                 Best: {streak.longestStreak} days
-              </div>
-            </div>
-
-            {/* Tracked Time */}
-            <div className="rounded-lg p-3 bg-muted/50">
-              <div className="text-xs text-muted-foreground mb-1">Tracked</div>
-              <div className="text-xl font-semibold tabular-nums">
-                {formatDuration(focusBreakdown.focusTimeMs)}
-              </div>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
-                <div
-                  className="h-full bg-foreground/30 rounded-full transition-all"
-                  style={{ width: `${Math.min(focusPercentage, 100)}%` }}
-                />
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {focusPercentage}% of 8h goal
               </div>
             </div>
 

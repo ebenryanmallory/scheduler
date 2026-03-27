@@ -12,7 +12,6 @@ import { NestedTimeBlocksProps } from '@/types/timeBlock'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTaskStore } from '@/store/taskStore'
 import { TimeBlockDropZone } from './TimeBlockDropZone'
-import { Clock } from 'lucide-react'
 
 export function NestedTimeBlocks({ 
   startTime, 
@@ -124,12 +123,6 @@ export function NestedTimeBlocks({
                     >
                       {task.project}
                     </Badge>
-                  )}
-                  {task.estimatedDuration && (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {task.estimatedDuration}m
-                    </span>
                   )}
                 </div>
               )}

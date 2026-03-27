@@ -204,7 +204,6 @@ export const useTemplateStore = create<TemplateStore>()(
             title: task.title,
             description: task.description,
             project: task.project,
-            estimatedDuration: task.estimatedDuration,
             persistent: task.persistent,
           },
           isBuiltIn: false,

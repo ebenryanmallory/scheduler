@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label"
 import { EditTaskDialogProps } from '@/types/editTaskDialog'
 import { ProjectName, useProjectStore } from '@/store/projectStore'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
-import { formatTimeHHMMSS } from '@/hooks/useTimer'
 import { RecurrenceSelector } from '@/components/RecurrenceSelector'
 import { RecurrenceConfig } from '@/types/recurrence'
 import { configToRRuleString, parseRRuleString, isRecurring, isRecurringInstance } from '@/lib/recurrence'
@@ -31,8 +30,6 @@ export function EditTaskDialog({
   const [project, setProject] = useState<ProjectName | undefined>(task.project)
   const [scheduledTime, setScheduledTime] = useState(task.scheduledTime)
   const [persistent, setPersistent] = useState(task.persistent || false)
-  const [estimatedDuration, setEstimatedDuration] = useState(task.estimatedDuration?.toString() || '')
-  const [manualActualDuration, setManualActualDuration] = useState(task.actualDuration?.toString() || '')
   const [recurrence, setRecurrence] = useState<RecurrenceConfig | null>(() => {
     if (task.recurrence?.rruleString) {
       return parseRRuleString(task.recurrence.rruleString)
@@ -55,8 +52,6 @@ export function EditTaskDialog({
       setProject(task.project)
       setScheduledTime(task.scheduledTime)
       setPersistent(task.persistent || false)
-      setEstimatedDuration(task.estimatedDuration?.toString() || '')
-      setManualActualDuration(task.actualDuration?.toString() || '')
       setRecurrence(task.recurrence?.rruleString ? parseRRuleString(task.recurrence.rruleString) : null)
     }
   }, [open, task])
@@ -73,9 +68,6 @@ export function EditTaskDialog({
       persistent,
       completed: task.completed,
       date: task.date,
-      estimatedDuration: estimatedDuration ? parseInt(estimatedDuration, 10) : undefined,
-      actualDuration: manualActualDuration ? parseInt(manualActualDuration, 10) : task.actualDuration,
-      timeTracking: task.timeTracking,
       // Handle recurrence - preserve instance relationship if editing instance
       recurrence: isInstance 
         ? task.recurrence // Keep instance relationship
@@ -150,38 +142,6 @@ export function EditTaskDialog({
             />
           </div>
           
-          {/* Time Tracking Fields */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="estimated-duration" className="text-xs text-muted-foreground">
-                Estimated (minutes)
-              </Label>
-              <Input
-                id="estimated-duration"
-                type="number"
-                placeholder="Est. minutes"
-                value={estimatedDuration}
-                onChange={(e) => setEstimatedDuration(e.target.value)}
-                min={1}
-                className="min-h-[44px] sm:min-h-0"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="actual-duration" className="text-xs text-muted-foreground">
-                Actual (minutes)
-              </Label>
-              <Input
-                id="actual-duration"
-                type="number"
-                placeholder="Actual minutes"
-                value={manualActualDuration}
-                onChange={(e) => setManualActualDuration(e.target.value)}
-                min={0}
-                className="min-h-[44px] sm:min-h-0"
-              />
-            </div>
-          </div>
-          
           {/* Recurrence selector - only show if not editing an instance */}
           {!isInstance && (
             <div className="space-y-1">
@@ -214,25 +174,6 @@ export function EditTaskDialog({
             </div>
           )}
 
-          {/* Time Tracking History Display */}
-          {task.timeTracking && task.timeTracking.history && task.timeTracking.history.length > 0 && (
-            <div className="text-xs text-muted-foreground space-y-1">
-              <Label className="text-xs">Time Tracking History</Label>
-              <div className="max-h-24 overflow-y-auto space-y-1 p-2 bg-muted/50 rounded">
-                {task.timeTracking.history.map((entry, index) => (
-                  <div key={index} className="flex justify-between">
-                    <span>{new Date(entry.startedAt).toLocaleDateString()}</span>
-                    <span className="font-mono">{formatTimeHHMMSS(entry.durationMs)}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between font-medium pt-1 border-t">
-                  <span>Total</span>
-                  <span className="font-mono">{formatTimeHHMMSS(task.timeTracking.accumulatedMs)}</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
           <div className="flex items-center space-x-2 min-h-[44px] sm:min-h-0">
             <Checkbox 
               id="persistent-edit"

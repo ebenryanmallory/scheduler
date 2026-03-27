@@ -9,7 +9,6 @@ import { useNotifications } from './hooks/useNotifications'
 import { ThemeProvider } from './context/ThemeContext'
 import { ThemeToggle } from './components/ThemeToggle'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import TimeAnalyticsWidget from './components/TimeAnalyticsWidget'
 import QuickStatsWidget from './components/QuickStatsWidget'
 import packageJson from '../package.json'
 import { TaskType } from './types/task'
@@ -148,7 +147,6 @@ function AppContent() {
 
             <div id="card-analytics" className="space-y-4">
               <QuickStatsWidget />
-              <TimeAnalyticsWidget />
             </div>
 
             <CollapsibleSection id="card-ideas" title="Ideas" storageKey="mobile-ideas" autoCollapseOnMobile>
@@ -173,9 +171,8 @@ function AppContent() {
             />
 
             {/* Analytics Widgets */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            <div className="mt-6">
               <QuickStatsWidget />
-              <TimeAnalyticsWidget />
             </div>
           </div>
         )}

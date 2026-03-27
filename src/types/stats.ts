@@ -18,26 +18,14 @@ export interface StreakData {
   lastActiveDate: string;
 }
 
-/** Focus vs break time breakdown */
-export interface FocusBreakdown {
-  /** Total focus/tracked time in milliseconds */
-  focusTimeMs: number;
-  /** Estimated untracked time in milliseconds */
-  breakTimeMs: number;
-  /** Focus ratio (0-1): focus / (focus + break) */
-  ratio: number;
-}
-
 /** Productivity score with breakdown */
 export interface ProductivityScore {
   /** Overall score (0-100) */
   score: number;
   /** Score breakdown factors */
   factors: {
-    /** Completion rate contribution (0-50) */
+    /** Completion rate contribution (0-80) */
     completionRate: number;
-    /** Time accuracy contribution (0-30) */
-    timeAccuracy: number;
     /** Streak bonus contribution (0-20) */
     consistencyBonus: number;
   };
@@ -74,7 +62,6 @@ export interface Milestone {
 export interface QuickStats {
   dailyProgress: DailyProgress;
   streak: StreakData;
-  focusBreakdown: FocusBreakdown;
   productivityScore: ProductivityScore;
   /** Recently triggered milestones */
   newMilestones: Milestone[];

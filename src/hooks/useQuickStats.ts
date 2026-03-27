@@ -1,11 +1,9 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { useTaskStore } from '@/store/taskStore';
-import { useTimeAnalytics } from './useTimeAnalytics';
 import { TaskType } from '@/types/task';
 import {
   DailyProgress,
   StreakData,
-  FocusBreakdown,
   ProductivityScore,
   QuickStats,
   Milestone,
@@ -39,11 +37,6 @@ function formatDateKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-// Convert minutes to milliseconds
-function minutesToMs(minutes: number): number {
-  return minutes * 60 * 1000;
 }
 
 /**
@@ -173,61 +166,19 @@ function calculateStreak(tasks: TaskType[]): StreakData {
 }
 
 /**
- * Calculate focus time breakdown
- * Focus = tracked time, Break = estimated untracked time (8h workday assumption)
- */
-function calculateFocusBreakdown(tasks: TaskType[]): FocusBreakdown {
-  const today = startOfDay(new Date());
-  
-  const todayTasks = tasks.filter((task) => {
-    const taskDate = new Date(task.date);
-    return isSameDay(taskDate, today);
-  });
-
-  let focusTimeMs = 0;
-  
-  for (const task of todayTasks) {
-    if (task.actualDuration !== undefined && task.actualDuration > 0) {
-      focusTimeMs += minutesToMs(task.actualDuration);
-    } else if (task.timeTracking?.accumulatedMs) {
-      focusTimeMs += task.timeTracking.accumulatedMs;
-    }
-  }
-
-  // Assume 8-hour workday, break = untracked time
-  const workdayMs = 8 * 60 * 60 * 1000; // 8 hours
-  const breakTimeMs = Math.max(0, workdayMs - focusTimeMs);
-  
-  // Calculate ratio (if no tracked time, ratio is 0)
-  const totalTime = focusTimeMs + breakTimeMs;
-  const ratio = totalTime > 0 ? focusTimeMs / totalTime : 0;
-
-  return {
-    focusTimeMs,
-    breakTimeMs,
-    ratio,
-  };
-}
-
-/**
- * Calculate productivity score based on completion rate, time accuracy, and streak
+ * Calculate productivity score based on completion rate and streak
  */
 function calculateProductivityScore(
   dailyProgress: DailyProgress,
-  timeAccuracy: number, // 0-100 from TimeAnalytics
   streakDays: number
 ): ProductivityScore {
   // Weights
-  const completionWeight = 0.5;
-  const accuracyWeight = 0.3;
+  const completionWeight = 0.8;
   const streakWeight = 0.2;
 
   // Completion rate (0-100)
   const completionRate = dailyProgress.percentage;
   const completionContribution = (completionRate / 100) * completionWeight * 100;
-
-  // Time accuracy (0-100)
-  const accuracyContribution = (timeAccuracy / 100) * accuracyWeight * 100;
 
   // Streak bonus: +1 point per day, max 20 points contribution
   const streakBonus = Math.min(streakDays, 20) / 20;
@@ -235,14 +186,13 @@ function calculateProductivityScore(
 
   // Total score
   const score = Math.round(
-    Math.min(100, Math.max(0, completionContribution + accuracyContribution + streakContribution))
+    Math.min(100, Math.max(0, completionContribution + streakContribution))
   );
 
   return {
     score,
     factors: {
       completionRate: Math.round(completionContribution),
-      timeAccuracy: Math.round(accuracyContribution),
       consistencyBonus: Math.round(streakContribution),
     },
   };
@@ -361,8 +311,7 @@ interface UseQuickStatsReturn extends QuickStats {
  */
 export function useQuickStats(): UseQuickStatsReturn {
   const { tasks } = useTaskStore();
-  const { dailyStats } = useTimeAnalytics();
-  
+
   const [updateTrigger, setUpdateTrigger] = useState(0);
   const [prevProgress, setPrevProgress] = useState<DailyProgress | null>(null);
 
@@ -403,15 +352,10 @@ export function useQuickStats(): UseQuickStatsReturn {
     return calculateStreak(tasks);
   }, [tasks, updateTrigger]);
 
-  // Memoized focus breakdown
-  const focusBreakdown = useMemo(() => {
-    return calculateFocusBreakdown(tasks);
-  }, [tasks, updateTrigger]);
-
   // Memoized productivity score
   const productivityScore = useMemo(() => {
-    return calculateProductivityScore(dailyProgress, dailyStats.accuracy, streak.currentStreak);
-  }, [dailyProgress, dailyStats.accuracy, streak.currentStreak, updateTrigger]);
+    return calculateProductivityScore(dailyProgress, streak.currentStreak);
+  }, [dailyProgress, streak.currentStreak, updateTrigger]);
 
   // Check for new milestones
   const newMilestones = useMemo(() => {
@@ -427,7 +371,6 @@ export function useQuickStats(): UseQuickStatsReturn {
   return {
     dailyProgress,
     streak,
-    focusBreakdown,
     productivityScore,
     newMilestones,
     refresh,

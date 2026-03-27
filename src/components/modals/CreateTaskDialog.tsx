@@ -31,7 +31,6 @@ function CreateTaskDialog({
   const [title, setTitle] = useState("")
   const [project, setProject] = useState<ProjectName | "">("")
   const [persistent, setPersistent] = useState(false)
-  const [estimatedDuration, setEstimatedDuration] = useState("")
   const [recurrence, setRecurrence] = useState<RecurrenceConfig | null>(null)
   const [templateLibraryOpen, setTemplateLibraryOpen] = useState(false)
 
@@ -43,7 +42,6 @@ function CreateTaskDialog({
     if (template.taskDefaults.title) setTitle(template.taskDefaults.title)
     if (template.taskDefaults.project) setProject(template.taskDefaults.project as ProjectName)
     if (template.taskDefaults.persistent !== undefined) setPersistent(template.taskDefaults.persistent)
-    if (template.taskDefaults.estimatedDuration) setEstimatedDuration(template.taskDefaults.estimatedDuration.toString())
     if (template.taskDefaults.recurrence) setRecurrence(template.taskDefaults.recurrence)
   }
 
@@ -69,12 +67,6 @@ function CreateTaskDialog({
         description: '',
         project: project || undefined,
         persistent,
-        estimatedDuration: estimatedDuration ? parseInt(estimatedDuration, 10) : undefined,
-        timeTracking: {
-          status: 'not_started',
-          accumulatedMs: 0,
-          history: []
-        },
         // Add recurrence if configured
         recurrence: recurrence && recurrence.interval > 0 ? {
           rruleString: configToRRuleString(recurrence, effectiveDate),
@@ -86,7 +78,6 @@ function CreateTaskDialog({
       setTitle("")
       setProject("")
       setPersistent(false)
-      setEstimatedDuration("")
       setRecurrence(null)
       onOpenChange(false)
     } catch (error) {
@@ -178,17 +169,6 @@ function CreateTaskDialog({
             </SelectContent>
           </Select>
           
-          <div>
-            <Input
-              type="number"
-              placeholder="Estimated duration (minutes)"
-              value={estimatedDuration}
-              onChange={(e) => setEstimatedDuration(e.target.value)}
-              min={1}
-              className="min-h-[44px] sm:min-h-0"
-            />
-          </div>
-
           {/* Recurrence selector (AC1, AC2) */}
           <RecurrenceSelector
             value={recurrence}

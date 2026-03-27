@@ -8,10 +8,9 @@ interface SortableTaskProps extends TaskType {
   onTaskUpdate?: (task: TaskType) => void
   onEdit?: (task: TaskType) => void
   onDelete?: (id: string) => void
-  showTimer?: boolean
 }
 
-export function SortableTask({ showTimer = true, ...props }: SortableTaskProps) {
+export function SortableTask({ ...props }: SortableTaskProps) {
   const {
     attributes,
     listeners,
@@ -31,11 +30,10 @@ export function SortableTask({ showTimer = true, ...props }: SortableTaskProps) 
         <GripVertical className="h-5 w-5 text-gray-400" />
       </div>
       <div className="flex-1">
-        <Task {...props} 
-          onEdit={props.onEdit} 
+        <Task {...props}
+          onEdit={props.onEdit}
           onTaskUpdate={props.onTaskUpdate}
           onDelete={props.onDelete}
-          showTimer={showTimer}
         />
       </div>
     </div>
