@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { gitSyncService, SyncState, ConflictInfo } from '../services/gitSyncService'
+import { gitSyncService, SyncState, ConflictInfo } from '../services/gitSyncService.js'
 
 const router = Router()
 

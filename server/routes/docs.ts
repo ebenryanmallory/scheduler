@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { DocsService } from '../services/docsService';
+import { DocsService } from '../services/docsService.js';
 
 const router = Router();
 const docsService = new DocsService();
@@ -50,6 +50,25 @@ router.get('/progress', async (_req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch project progress',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Delete a doc file or folder (and all files inside it)
+router.delete('/', async (req: Request, res: Response) => {
+  try {
+    const filePath = req.query.path as string;
+    if (!filePath) {
+      res.status(400).json({ success: false, message: 'File path is required' });
+      return;
+    }
+    await docsService.deleteDoc(filePath);
+    res.json({ success: true, message: 'Deleted' });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }

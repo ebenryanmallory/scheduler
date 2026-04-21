@@ -6,13 +6,13 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { TaskService } from './services/taskService';
-import { IdeaService } from './services/ideaService';
+import { TaskService } from './services/taskService.js';
+import { IdeaService } from './services/ideaService.js';
 import dotenv from 'dotenv';
-import projectRoutes from './routes/projects'
-import docsRoutes from './routes/docs'
-import syncRoutes from './routes/sync'
-import { gitSyncService } from './services/gitSyncService'
+import projectRoutes from './routes/projects.js'
+import docsRoutes from './routes/docs.js'
+import syncRoutes from './routes/sync.js'
+import { gitSyncService } from './services/gitSyncService.js'
 dotenv.config();
 
 // Define __dirname for ES modules

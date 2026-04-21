@@ -1,4 +1,4 @@
-import { FileService } from './fileService'
+import { FileService } from './fileService.js'
 import path from 'path'
 
 interface Project {

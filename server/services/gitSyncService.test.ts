@@ -34,7 +34,7 @@ vi.mock('simple-git', () => {
 })
 
 // Import after mocking
-import { GitSyncService, SyncState } from './gitSyncService'
+import { GitSyncService, SyncState } from './gitSyncService.js'
 import { simpleGit } from 'simple-git'
 
 describe('GitSyncService', () => {
@@ -153,12 +153,12 @@ describe('GitSyncService', () => {
   describe('Retry Logic with Exponential Backoff', () => {
     it('should retry push with exponential backoff delays', async () => {
       let pushAttempts = 0
-      vi.mocked(mockGit.push).mockImplementation(async () => {
+      ;(mockGit.push as any).mockImplementation(async () => {
         pushAttempts++
         if (pushAttempts < 3) {
           throw new Error('Network error')
         }
-        return undefined as never
+        return undefined
       })
 
       vi.mocked(mockGit.status).mockResolvedValue({
@@ -200,7 +200,7 @@ describe('GitSyncService', () => {
 
     it('should not retry on authentication errors', async () => {
       let pushAttempts = 0
-      vi.mocked(mockGit.push).mockImplementation(async () => {
+      ;(mockGit.push as any).mockImplementation(async () => {
         pushAttempts++
         throw new Error('authentication failed')
       })
@@ -225,7 +225,7 @@ describe('GitSyncService', () => {
 
     it('should not retry on permission errors', async () => {
       let pushAttempts = 0
-      vi.mocked(mockGit.push).mockImplementation(async () => {
+      ;(mockGit.push as any).mockImplementation(async () => {
         pushAttempts++
         throw new Error('permission denied')
       })
@@ -337,7 +337,7 @@ describe('GitSyncService', () => {
       } as never)
 
       const states: SyncState['status'][] = []
-      service.subscribe((state) => {
+      service.subscribe((state: SyncState) => {
         states.push(state.status)
       })
 

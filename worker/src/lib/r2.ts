@@ -65,3 +65,18 @@ export async function deleteDoc(bucket: R2Bucket, userId: string, filePath: stri
   const key = `${userId}/${filePath}`
   await bucket.delete(key)
 }
+
+/** Delete all doc files under a folder prefix */
+export async function deleteFolderDocs(bucket: R2Bucket, userId: string, folderPath: string): Promise<void> {
+  const prefix = `${userId}/${folderPath}/`
+  let cursor: string | undefined
+
+  do {
+    const listed = await bucket.list({ prefix, cursor })
+    const keys = listed.objects.map(obj => obj.key)
+    if (keys.length > 0) {
+      await Promise.all(keys.map(key => bucket.delete(key)))
+    }
+    cursor = listed.truncated ? listed.cursor : undefined
+  } while (cursor)
+}

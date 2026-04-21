@@ -48,13 +48,18 @@ export async function handleDocs(request: Request, env: Env, userId: string, url
     return json({ success: true, uploaded }, 201)
   }
 
-  // DELETE /api/docs?path=foo/bar.md
+  // DELETE /api/docs?path=foo/bar.md  (works for files and folders)
   if (method === 'DELETE') {
     const filePath = url.searchParams.get('path')
     if (!filePath) return error('File path is required', 400)
 
-    await r2.deleteDoc(env.DOCS_BUCKET, userId, filePath)
-    return json({ success: true, message: 'Doc deleted' })
+    const isFolder = !filePath.endsWith('.md')
+    if (isFolder) {
+      await r2.deleteFolderDocs(env.DOCS_BUCKET, userId, filePath)
+    } else {
+      await r2.deleteDoc(env.DOCS_BUCKET, userId, filePath)
+    }
+    return json({ success: true, message: isFolder ? 'Folder deleted' : 'Doc deleted' })
   }
 
   return error('Not found', 404)

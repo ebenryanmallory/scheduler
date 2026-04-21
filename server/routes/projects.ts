@@ -1,5 +1,5 @@
 import express from 'express'
-import { ProjectService } from '../services/projectService'
+import { ProjectService } from '../services/projectService.js'
 
 const router = express.Router()
 const projectService = new ProjectService()
@@ -21,18 +21,20 @@ router.post('/reorder', async (req, res) => {
 
     if (!Array.isArray(newOrder)) {
       console.error('Invalid request body:', newOrder) // Debug log
-      return res.status(400).json({ error: 'Invalid request - expected array of projects' })
+      res.status(400).json({ error: 'Invalid request - expected array of projects' })
+      return
     }
 
     // Validate each project in the array
-    if (!newOrder.every(project => 
-      typeof project === 'object' && 
-      project !== null && 
+    if (!newOrder.every(project =>
+      typeof project === 'object' &&
+      project !== null &&
       typeof project.id === 'string' &&
       typeof project.order === 'number'
     )) {
       console.error('Invalid project data in array:', newOrder) // Debug log
-      return res.status(400).json({ error: 'Invalid project data in array' })
+      res.status(400).json({ error: 'Invalid project data in array' })
+      return
     }
 
     await projectService.reorderProjects(newOrder)
@@ -65,7 +67,8 @@ router.patch('/:id', async (req, res) => {
     const updatedProject = await projectService.updateProject(id, updates)
     
     if (!updatedProject) {
-      return res.status(404).json({ error: 'Project not found' })
+      res.status(404).json({ error: 'Project not found' })
+      return
     }
     
     res.json(updatedProject)
@@ -82,7 +85,8 @@ router.delete('/:id', async (req, res) => {
     res.status(204).send() // 204 No Content is appropriate for successful deletion
   } catch (error) {
     if ((error as Error).message === 'Project not found') {
-      return res.status(404).json({ error: 'Project not found' })
+      res.status(404).json({ error: 'Project not found' })
+      return
     }
     res.status(500).json({ error: 'Failed to delete project' })
   }

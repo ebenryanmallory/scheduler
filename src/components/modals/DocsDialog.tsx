@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ReactMarkdown from 'react-markdown'
@@ -36,7 +36,7 @@ function FileTreeItem({
 }: {
   item: DocFile
   onSelect: (path: string) => void
-  onDelete: (path: string) => void
+  onDelete: (path: string, isFolder: boolean) => void
   selectedPath: string | null
   depth?: number
 }) {
@@ -80,15 +80,13 @@ function FileTreeItem({
           <span className="truncate capitalize">{displayName}</span>
         </button>
 
-        {!isFolder && (
-          <button
-            onClick={() => onDelete(item.path)}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:text-red-500 transition-all flex-shrink-0"
-            title="Delete file"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
+        <button
+          onClick={() => onDelete(item.path, isFolder)}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:text-red-500 transition-all flex-shrink-0"
+          title={isFolder ? 'Delete folder and all files inside' : 'Delete file'}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {isFolder && isExpanded && item.children && (
@@ -116,8 +114,6 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
   useEffect(() => {
     if (open) {
       fetchDocsTree()
@@ -188,15 +184,17 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
       setError('Failed to upload files')
     } finally {
       setIsUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
-  const handleDelete = async (path: string) => {
-    if (!confirm(`Delete ${path}?`)) return
+  const handleDelete = async (path: string, isFolder: boolean) => {
+    const message = isFolder
+      ? `Delete folder "${path}" and all files inside it?`
+      : `Delete ${path}?`
+    if (!confirm(message)) return
     try {
       await authFetch(`/api/docs?path=${encodeURIComponent(path)}`, { method: 'DELETE' })
-      if (selectedPath === path) {
+      if (selectedPath === path || (isFolder && selectedPath?.startsWith(path + '/'))) {
         setSelectedPath(null)
         setContent('')
       }
@@ -222,36 +220,10 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-6xl h-[85vh] p-0 gap-0 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 border-amber-200/50 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b border-amber-200/50 bg-white/40 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold text-stone-800 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-amber-600" />
-              Docs
-            </DialogTitle>
-
-            {/* Upload button */}
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".md"
-                multiple
-                // @ts-expect-error webkitdirectory is not in TS types
-                webkitdirectory=""
-                className="hidden"
-                onChange={handleUpload}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-100"
-              >
-                <Upload className="h-4 w-4" />
-                {isUploading ? 'Uploading...' : 'Upload Files'}
-              </Button>
-            </div>
-          </div>
+          <DialogTitle className="text-xl font-semibold text-stone-800 flex items-center gap-2">
+            <FileText className="h-5 w-5 text-amber-600" />
+            Docs
+          </DialogTitle>
           {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
         </DialogHeader>
 
@@ -259,9 +231,17 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
           {/* Sidebar - File Tree */}
           <div className="w-72 border-r border-amber-200/50 bg-white/30 backdrop-blur-sm overflow-y-auto flex-shrink-0">
             <div className="p-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500 mb-3 px-2">
-                Files
-              </h3>
+              <div className="flex items-center justify-between mb-3 px-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                  Files
+                </h3>
+              </div>
+              <label className={`w-full flex items-center justify-center gap-2 mb-3 px-3 py-1.5 text-sm rounded-md border border-amber-300 text-amber-700 cursor-pointer transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : 'hover:bg-amber-100'}`}>
+                <Upload className="h-4 w-4" />
+                {isUploading ? 'Uploading...' : 'Upload Files'}
+                {/* @ts-expect-error webkitdirectory is not in TS types */}
+                <input type="file" accept=".md" multiple webkitdirectory="" className="hidden" onChange={handleUpload} disabled={isUploading} />
+              </label>
 
               {docsTree.length > 0 ? (
                 <nav className="space-y-0.5">

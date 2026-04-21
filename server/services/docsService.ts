@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from 'fs/promises';
+import { readdir, readFile, stat, unlink, rm } from 'fs/promises';
 import path from 'path';
 import * as yaml from 'js-yaml';
 
@@ -131,6 +131,19 @@ export class DocsService {
       if (a.type === 'file' && b.type === 'folder') return 1;
       return a.name.localeCompare(b.name);
     });
+  }
+
+  async deleteDoc(filePath: string): Promise<void> {
+    const normalizedPath = path.normalize(filePath).replace(/^(\.\.(\/|\\|$))+/, '');
+    const fullPath = path.join(this.docsPath, normalizedPath);
+    if (!fullPath.startsWith(this.docsPath)) throw new Error('Invalid file path');
+
+    const stats = await stat(fullPath);
+    if (stats.isDirectory()) {
+      await rm(fullPath, { recursive: true, force: true });
+    } else {
+      await unlink(fullPath);
+    }
   }
 
   async getDocContent(filePath: string): Promise<string> {
