@@ -9,7 +9,6 @@ import { useNotifications } from './hooks/useNotifications'
 import { ThemeProvider } from './context/ThemeContext'
 import { ThemeToggle } from './components/ThemeToggle'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import QuickStatsWidget from './components/QuickStatsWidget'
 import packageJson from '../package.json'
 import { TaskType } from './types/task'
 import { Toaster, toast } from 'react-hot-toast';
@@ -145,10 +144,6 @@ function AppContent() {
               />
             </div>
 
-            <div id="card-analytics" className="space-y-4">
-              <QuickStatsWidget />
-            </div>
-
             <CollapsibleSection id="card-ideas" title="Ideas" storageKey="mobile-ideas" autoCollapseOnMobile>
               <IdeasWidget />
             </CollapsibleSection>
@@ -170,10 +165,6 @@ function AppContent() {
               onTimeBlockSelect={setSelectedTimeBlock}
             />
 
-            {/* Analytics Widgets */}
-            <div className="mt-6">
-              <QuickStatsWidget />
-            </div>
           </div>
         )}
 
