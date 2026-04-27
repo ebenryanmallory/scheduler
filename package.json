@@ -6,11 +6,12 @@
     "name": "Eben Mallory"
   },
   "scripts": {
+    "clean": "find . -name '._*' -not -path './node_modules/*' -delete",
     "dev": "concurrently \"vite\" \"wrangler dev --port 8787\"",
     "dev:worker": "vite build && wrangler dev",
-    "build": "tsc -p tsconfig.server.json && vite build",
-    "build:cf": "vite build",
-    "deploy": "vite build && wrangler deploy",
+    "build": "tsc -p tsconfig.server.json && vite build && npm run clean",
+    "build:cf": "vite build && npm run clean",
+    "deploy": "npm run build:cf && wrangler deploy",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server/dist/index.js",
