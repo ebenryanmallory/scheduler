@@ -5,9 +5,9 @@ export interface DocFile {
   children?: DocFile[]
 }
 
-/** List all docs for a user and return as a nested file tree */
-export async function listUserDocs(bucket: R2Bucket, userId: string): Promise<DocFile[]> {
-  const prefix = `${userId}/`
+/** List all docs for a user+project and return as a nested file tree */
+export async function listUserDocs(bucket: R2Bucket, userId: string, projectId: string): Promise<DocFile[]> {
+  const prefix = `${userId}/${projectId}/`
   const listed = await bucket.list({ prefix })
 
   const paths = listed.objects.map(obj => obj.key.slice(prefix.length))
@@ -45,30 +45,30 @@ function buildTree(paths: string[]): DocFile[] {
 }
 
 /** Get the raw content of a single doc file */
-export async function getDocContent(bucket: R2Bucket, userId: string, filePath: string): Promise<string | null> {
-  const key = `${userId}/${filePath}`
+export async function getDocContent(bucket: R2Bucket, userId: string, projectId: string, filePath: string): Promise<string | null> {
+  const key = `${userId}/${projectId}/${filePath}`
   const obj = await bucket.get(key)
   if (!obj) return null
   return obj.text()
 }
 
 /** Store a doc file */
-export async function putDoc(bucket: R2Bucket, userId: string, filePath: string, content: string): Promise<void> {
-  const key = `${userId}/${filePath}`
+export async function putDoc(bucket: R2Bucket, userId: string, projectId: string, filePath: string, content: string): Promise<void> {
+  const key = `${userId}/${projectId}/${filePath}`
   await bucket.put(key, content, {
     httpMetadata: { contentType: 'text/markdown; charset=utf-8' },
   })
 }
 
 /** Delete a doc file */
-export async function deleteDoc(bucket: R2Bucket, userId: string, filePath: string): Promise<void> {
-  const key = `${userId}/${filePath}`
+export async function deleteDoc(bucket: R2Bucket, userId: string, projectId: string, filePath: string): Promise<void> {
+  const key = `${userId}/${projectId}/${filePath}`
   await bucket.delete(key)
 }
 
 /** Delete all doc files under a folder prefix */
-export async function deleteFolderDocs(bucket: R2Bucket, userId: string, folderPath: string): Promise<void> {
-  const prefix = `${userId}/${folderPath}/`
+export async function deleteFolderDocs(bucket: R2Bucket, userId: string, projectId: string, folderPath: string): Promise<void> {
+  const prefix = `${userId}/${projectId}/${folderPath}/`
   let cursor: string | undefined
 
   do {

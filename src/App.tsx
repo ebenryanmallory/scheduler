@@ -24,6 +24,7 @@ import {
 import IdeasWidget from './components/IdeasWidget'
 import ProjectsWidget from './components/ProjectsWidget'
 import DocsWidget from './components/DocsWidget'
+import { useProjectStore } from './store/projectStore'
 import { Menu } from 'lucide-react'
 import { OfflineBadge, OfflineIndicator } from './components/OfflineIndicator'
 import { InstallPrompt } from './components/InstallPrompt'
@@ -44,6 +45,12 @@ function AppContent() {
     setSelectedTimeBlock,
     addTask,
   } = useTaskStore()
+
+  const storeProjects = useProjectStore(state => state.projects)
+  const topTwoProjects = useMemo(
+    () => [...storeProjects].sort((a, b) => a.order - b.order).slice(0, 2),
+    [storeProjects]
+  )
 
   // Initialize notification system
   useNotifications();
@@ -152,9 +159,15 @@ function AppContent() {
               <ProjectsWidget />
             </CollapsibleSection>
 
-            <CollapsibleSection id="card-docs" title="Docs" storageKey="mobile-docs" autoCollapseOnMobile>
-              <DocsWidget />
-            </CollapsibleSection>
+            {topTwoProjects.length > 0 && (
+              <CollapsibleSection id="card-docs" title="Project Docs" storageKey="mobile-docs" autoCollapseOnMobile>
+                <div className="flex flex-col gap-2">
+                  {topTwoProjects.map(project => (
+                    <DocsWidget key={project.id} project={project} />
+                  ))}
+                </div>
+              </CollapsibleSection>
+            )}
           </div>
         ) : (
           // Desktop: standard layout

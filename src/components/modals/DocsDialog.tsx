@@ -25,6 +25,8 @@ interface DocFile {
 interface DocsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  projectId: string
+  projectTitle: string
 }
 
 function FileTreeItem({
@@ -107,18 +109,19 @@ function FileTreeItem({
   )
 }
 
-export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
+export default function DocsDialog({ open, onOpenChange, projectId, projectTitle }: DocsDialogProps) {
   const [docsTree, setDocsTree] = useState<DocFile[]>([])
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [content, setContent] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
     if (open) {
       fetchDocsTree()
     }
-  }, [open])
+  }, [open, projectId])
 
   useEffect(() => {
     if (selectedPath) {
@@ -128,7 +131,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
 
   const fetchDocsTree = async () => {
     try {
-      const response = await authFetch('/api/docs/tree')
+      const response = await authFetch(`/api/docs/tree?projectId=${encodeURIComponent(projectId)}`)
       const data = await response.json()
       setDocsTree(data)
     } catch (err) {
@@ -141,7 +144,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await authFetch(`/api/docs/content?path=${encodeURIComponent(path)}`)
+      const response = await authFetch(`/api/docs/content?projectId=${encodeURIComponent(projectId)}&path=${encodeURIComponent(path)}`)
       const data = await response.json()
       setContent(data.content)
     } catch (err) {
@@ -172,7 +175,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
         formData.append(relativePath, file)
       }
 
-      const response = await authFetch('/api/docs/upload', {
+      const response = await authFetch(`/api/docs/upload?projectId=${encodeURIComponent(projectId)}`, {
         method: 'POST',
         body: formData,
       })
@@ -193,7 +196,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
       : `Delete ${path}?`
     if (!confirm(message)) return
     try {
-      await authFetch(`/api/docs?path=${encodeURIComponent(path)}`, { method: 'DELETE' })
+      await authFetch(`/api/docs?projectId=${encodeURIComponent(projectId)}&path=${encodeURIComponent(path)}`, { method: 'DELETE' })
       if (selectedPath === path || (isFolder && selectedPath?.startsWith(path + '/'))) {
         setSelectedPath(null)
         setContent('')
@@ -222,7 +225,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
         <DialogHeader className="px-6 py-4 border-b border-amber-200/50 bg-white/40 backdrop-blur-sm">
           <DialogTitle className="text-xl font-semibold text-stone-800 flex items-center gap-2">
             <FileText className="h-5 w-5 text-amber-600" />
-            Docs
+            {projectTitle} Docs
           </DialogTitle>
           {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
         </DialogHeader>
@@ -236,12 +239,19 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
                   Files
                 </h3>
               </div>
-              <label className={`w-full flex items-center justify-center gap-2 mb-3 px-3 py-1.5 text-sm rounded-md border border-amber-300 text-amber-700 cursor-pointer transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : 'hover:bg-amber-100'}`}>
-                <Upload className="h-4 w-4" />
-                {isUploading ? 'Uploading...' : 'Upload Files'}
-                {/* @ts-expect-error webkitdirectory is not in TS types */}
-                <input type="file" accept=".md" multiple webkitdirectory="" className="hidden" onChange={handleUpload} disabled={isUploading} />
-              </label>
+              <div className={`flex gap-2 mb-3 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-sm rounded-md border border-amber-300 text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors">
+                  <Upload className="h-3.5 w-3.5" />
+                  {isUploading ? 'Uploading...' : 'Files'}
+                  <input type="file" accept=".md" multiple className="hidden" onChange={handleUpload} disabled={isUploading} />
+                </label>
+                <label className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-sm rounded-md border border-amber-300 text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors">
+                  <Upload className="h-3.5 w-3.5" />
+                  {isUploading ? 'Uploading...' : 'Folder'}
+                  {/* @ts-expect-error webkitdirectory is not in TS types */}
+                  <input type="file" accept=".md" multiple webkitdirectory="" className="hidden" onChange={handleUpload} disabled={isUploading} />
+                </label>
+              </div>
 
               {docsTree.length > 0 ? (
                 <nav className="space-y-0.5">
@@ -309,7 +319,7 @@ export default function DocsDialog({ open, onOpenChange }: DocsDialogProps) {
                 <div className="w-24 h-24 rounded-full bg-amber-100/50 flex items-center justify-center mb-6">
                   <FileText className="h-12 w-12 text-amber-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-stone-700 mb-2">Your Markdown Docs</h3>
+                <h3 className="text-xl font-semibold text-stone-700 mb-2">{projectTitle} Docs</h3>
                 <p className="text-center text-stone-500 max-w-md">
                   Upload .md files or entire folders using the button above. Select any file from the sidebar to read it.
                 </p>

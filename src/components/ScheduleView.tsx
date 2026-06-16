@@ -9,6 +9,7 @@ import IdeasWidget from './IdeasWidget'
 import ProjectsWidget from './ProjectsWidget'
 import DocsWidget from './DocsWidget'
 import { ErrorFallback } from './ErrorBoundary'
+import { useProjectStore } from '../store/projectStore'
 import { DragDropScheduleProvider } from './DragDropScheduleProvider'
 import type { ScheduleViewProps, DialogState } from "@/types/schedule"
 import type { TaskType } from "@/types/task"
@@ -21,7 +22,13 @@ function ScheduleView({ selectedDate, onDateSelect }: ScheduleViewProps) {
   const isMobile = useIsMobile()
   const isDesktop = useIsDesktop()
 
-  const { 
+  const storeProjects = useProjectStore(state => state.projects)
+  const topTwoProjects = useMemo(
+    () => [...storeProjects].sort((a, b) => a.order - b.order).slice(0, 2),
+    [storeProjects]
+  )
+
+  const {
     tasks,
     isCreateDialogOpen,
     isLoading,
@@ -169,7 +176,13 @@ function ScheduleView({ selectedDate, onDateSelect }: ScheduleViewProps) {
               <>
                 <IdeasWidget />
                 <ProjectsWidget />
-                <DocsWidget />
+                {topTwoProjects.length > 0 && (
+                  <div className="w-full bg-card border rounded-lg p-4 flex flex-col gap-2">
+                    {topTwoProjects.map(project => (
+                      <DocsWidget key={project.id} project={project} />
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>

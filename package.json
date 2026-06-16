@@ -18,6 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "kb:start": "cd $HOME/Desktop/agentic-engineering/apps/kb-server && REPOS=\"kb:$HOME/Desktop/kb\" nohup .venv/bin/python -m src.server > /tmp/kb-server.log 2>&1 & echo \"KB server starting at http://localhost:8080\"",
+    "kb:stop": "pkill -f 'src.server' && echo 'KB server stopped' || echo 'KB server not running'",
+    "kb:status": "curl -s http://localhost:8080/health || echo 'KB server not running'",
     "db:schema": "wrangler d1 execute scheduler-db --file=worker/schema.sql --remote",
     "migrate": "tsx scripts/migrate-to-d1.ts",
     "migrate:remote": "wrangler d1 execute scheduler-db --file=seed.sql --remote"

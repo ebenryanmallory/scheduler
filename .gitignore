@@ -44,3 +44,8 @@ dist-ssr
 
 # Migration output
 seed.sql
+.claude/plans/
+
+# macOS metadata
+._*
+.DS_Store

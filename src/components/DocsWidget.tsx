@@ -2,30 +2,33 @@ import { useState } from "react"
 import { BookOpen } from "lucide-react"
 import { Button } from "./ui/button"
 import DocsDialog from "./modals/DocsDialog"
+import type { Project } from "@/types/project"
 
-function DocsWidget() {
+interface DocsWidgetProps {
+  project: Project
+}
+
+function DocsWidget({ project }: DocsWidgetProps) {
   const [isDocsOpen, setIsDocsOpen] = useState(false)
 
   return (
-    <div className="w-full bg-card border rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold">Project Docs</h3>
-      </div>
-
+    <>
       <Button
         variant="outline"
         onClick={() => setIsDocsOpen(true)}
         className="w-full"
       >
         <BookOpen className="h-4 w-4 mr-2" />
-        View Details
+        {project.title} Docs
       </Button>
 
       <DocsDialog
         open={isDocsOpen}
         onOpenChange={setIsDocsOpen}
+        projectId={project.id}
+        projectTitle={project.title}
       />
-    </div>
+    </>
   )
 }
 
